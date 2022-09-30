@@ -1,0 +1,34 @@
+---
+title: "Assignment 1"
+output: pdf_document
+date: "`r Sys.Date()`"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(afex)
+library(performance)
+library(magrittr)
+library(plyr)
+```
+
+## Question 4
+
+### a) Using the constrat $\mu = 0$:
+
+``` {r design_mat, echo=TRUE}
+
+data("iris");
+
+Y <- iris[order(iris$Species), "Sepal.Width"];
+
+X <- diag(3) %x% rep(1, 50);
+
+```
+Then we calculate the estimated $\hat{\beta} = (X^TX )^{-1}X^T Y$ as
+
+``` {r beta_hat, echo=TRUE}
+
+beta = (t(X) %*% X) %>% solve() %*% t(X) %*% Y;
+
+```
