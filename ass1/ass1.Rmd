@@ -10,6 +10,7 @@ library(afex)
 library(performance)
 library(magrittr)
 library(plyr)
+library(EnvStats)
 ```
 
 ## Question 4
@@ -46,7 +47,7 @@ s2 = norm(Y - matrix(rep(1, n),ncol=1) * mean(Y), type="2")^2;
 The unbiased estimator of $\sigma^2$ are $\frac{S_{\Omega}}{n - 1} =  `r s1`$
 and $\frac{S_{\omega}}{n - 1} =  `r s2`$.
 ```{r, echo=TRUE}
-unb_est = s1/(n - 1);
+unb_est = s1/(n - I);
 bet_ss = s2 - s1;
 bet_means = (s2 - s1)/(I);
 f_val = ((s2 - s1)/(I - 1))/(s2/(n - I));
@@ -64,6 +65,64 @@ The quantities needed to complete an ANOVA table are :
 
 \end{itemize}
 
+### b) We first check for the model assumptions:
+The normality of residuals with expectation zero are checked using QQ-plot, 
+Shapiro-Wilk test, and one-sample t-test.
+
+```{r, echo=TRUE}
+plot.new()
+res <- Y - c(rep(beta, 1, each=50));
+qqnorm(res)
+qqline(res)
+
+shapiro.test(res)
+
+t.test(res, mu=0, alternative = "greater")
+```
+Since the $p$-values for both test are larger than 0.05, with the mean of the residuals being
+extremely close, we can say that the normality and zero mean assumptions hold. 
+Next we check that $Var(e_{ij}) = \sigma^2$ using Bartlett test.
+
+```{r, echo=TRUE}
+
+species <- factor(c(rep(1, 50), rep(2, 50), rep(3, 50)),
+                  labels=c("setosa", "versicolor", "virginica"));
+data_iris <- data.frame(Y, species);
+
+bartlett.test(Y ~ species, data=data_iris)
+```
+Thus, the model assumptions hold. Now we test for the mean of iris sepal width of the 
+three species using the produced $F$-statistic above.
 
 
+```{r, echo=TRUE}
 
+pv <- pf(f_val, I - 1, n - I, lower.tail = FALSE);
+
+```
+
+The $p$-value is `r pv` $< 0.05$ so we can reject the null hypothesis
+that the means are statistically the same. 
+
+### c) 
+
+```{r, echo=TRUE}
+  
+model <- aov(Y ~ species, data=data_iris);
+
+summary(model)
+
+```
+It can be seen that the results from ANOVA agree with the final conclusion although
+some quantities are a bit off. 
+
+### d) 
+
+```{r, echo=TRUE}
+kruskal.test(Y ~ species, data=data_iris);
+```
+Thus, the Kruskal-Wallis test agrees with our findings since its $p$-value is smaller
+than 0.05, and because we the normal distribution assumption holds, the location parameters
+are the means.
+
+## Question 5
