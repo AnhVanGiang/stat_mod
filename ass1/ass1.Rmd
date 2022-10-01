@@ -24,12 +24,14 @@ Y <- iris[order(iris$Species), "Sepal.Width"];
 
 X <- diag(3) %x% rep(1, 50);
 
+n = 150;
+I = 3;
 ```
 Then we calculate the estimated $\hat{\beta} = (X^TX )^{-1}X^T Y$ as
 
 ``` {r, echo=TRUE}
 
-beta = (t(X) %*% X) %>% solve() %*% t(X) %*% Y;
+beta = solve((t(X) %*% X)) %*% t(X) %*% Y;
 
 ```
 
@@ -38,13 +40,30 @@ models respectively are
 
 ```{r, echo=TRUE}
 
-s1 = norm(Y - X %*% beta)^2;
-s2 = norm(Y - matrix(rep(1, 150),ncol=1) * mean(Y))^2;
+s1 = norm(Y - X %*% beta, type="2")^2;
+s2 = norm(Y - matrix(rep(1, n),ncol=1) * mean(Y), type="2")^2;
 ```
 The unbiased estimator of $\sigma^2$ are $\frac{S_{\Omega}}{n - 1} =  `r s1`$
 and $\frac{S_{\omega}}{n - 1} =  `r s2`$.
 ```{r, echo=TRUE}
-unb_est = s1/(150 - 1);
+unb_est = s1/(n - 1);
+bet_ss = s2 - s1;
+bet_means = (s2 - s1)/(I);
+f_val = ((s2 - s1)/(I - 1))/(s2/(n - I));
 
-
+within_means = s1/(n - I);
 ```
+The quantities needed to complete an ANOVA table are :
+
+\begin{itemize}
+
+\item Between groups sum of square: $S_{\omega} - S_{\Omega} = `r bet_ss`$.
+\item Between groups mean square: $\frac{(S_{\omega} - S_{\Omega})/(I - 1)}{S_{\Omega}/(n - I)} = `r bet_means`$.
+\item Within groups sum of square: $S_{\Omega} = `r s1`$.
+\item $F$ value = `r  f_val`.
+
+\end{itemize}
+
+
+
+
