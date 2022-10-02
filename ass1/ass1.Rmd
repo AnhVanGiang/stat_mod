@@ -67,7 +67,8 @@ The quantities needed to complete an ANOVA table are :
 
 ### b) We first check for the model assumptions:
 The normality of residuals with expectation zero are checked using QQ-plot, 
-Shapiro-Wilk test, and one-sample t-test.
+Shapiro-Wilk test, and one-sample t-test because the true standard deviation is not
+known.
 
 ```{r, echo=TRUE}
 plot.new()
@@ -126,3 +127,139 @@ than 0.05, and because we the normal distribution assumption holds, the location
 are the means.
 
 ## Question 5
+
+
+## Question 6
+```{r, echo=TRUE}
+
+diet <- read.table("diet.txt", header = TRUE);
+diet["weight.loss"] <- diet$preweight - diet$weight6weeks;
+
+```
+
+### a) A short summary of the data is given:
+
+```{r, echo=TRUE}
+summary(diet);
+
+```
+To further see the effects of the diets on weight loss, we use boxplots. 
+
+```{r, echo=TRUE}
+
+boxplot(weight.loss ~ diet, data=diet)
+
+
+```
+It can be seen that there are a few outliers within the samples and it may 
+affect our tests later thus we shall remove them.
+
+```{r, echo=TRUE}
+
+Q1 <- quantile(diet$preweight, probs=c(.25, .75), na.rm = FALSE)
+Q2 <- quantile(diet$weight6weeks, probs=c(.25, .75), na.rm = FALSE)
+
+iqr_pre <- IQR(diet$preweight);
+iqr_aft <- IQR(diet$weight6weeks);
+
+diet_elim <- subset(diet, (preweight > (Q1[1] - 1.5*iqr_pre) & 
+                          preweight < (Q1[2]+1.5*iqr_pre)) |
+                          (weight6weeks < (Q2[1] - 1.5*iqr_aft) &
+                          weight6weeks > (Q2[1] + 1.5*iqr_aft)));
+
+
+
+boxplot(diet_elim$preweight, diet_elim$weight6weeks,
+        names=c("Preweight", "Weight6weeks"),
+        ylab="kg",
+        main="Boxplot of Preweight and weight6weeks after removing outliers")
+
+```
+
+
+To check whether the diets affect the weight loss, we can test for statistical 
+difference between $preweight$ and $weight6weeks$, if the diet does not affect 
+then the mean is approximately the same and vice versa. We first use QQ-plot 
+and Shapiro-Wilk test to check the normality of the samples.
+
+
+```{r, echo=TRUE}
+
+par(mfrow=(c(1,2)))
+
+qqnorm(diet_elim$preweight, main="QQ-plot of preweight")
+qqline(diet_elim$preweight)
+
+qqnorm(diet_elim$weight6weeks, main="QQ-plot of weight6weeks")
+qqline(diet_elim$weight6weeks)
+
+shapiro.test(diet_elim$preweight)
+shapiro.test(diet_elim$weight6weeks)
+```
+The two $p$-values are higher than 0.05 thus we can safely assume that they do
+not significantly differ from normal distribution and the two samples $t$-test can
+be used.
+
+```{r, echo=TRUE}
+
+t.test(diet_elim$preweight, diet_elim$weight6weeks)
+
+```
+
+Since the resulting $p$-value from the $t$-test is smaller than 0.05, we can reject
+the null hypothesis that their means are the same, i.e there is a statistical
+significant difference in the means and the diets do affect the weight loss.
+
+### b) 
+To check whether any type of diet has an effect on the lost weight,
+we use ANOVA to test the null hypothesis that across all three diets, the means 
+of lost weights are the same.
+
+```{r, echo=TRUE}
+
+an_mod <- aov(weight.loss ~ diet, data=diet_elim)
+
+summary(an_mod)
+```
+The $p$-value is smaller than 0.05 so we can reject the null hypothesis and say
+that the diets have an effect on losing weight.
+
+To check which diet is best for losing weight, we test for the their repspective means 
+to see which has the highest means i.e expected lost weight. By definition,
+
+$$ weight.loss = preweight - weight6weeks,  $$,
+but $preweight$ and $weight6weeks$ are normally distributed so we can assume that
+$weight.loss$ is also normally distributed and the $t$-test can be used. We 
+check if diet 3 is more effective than 1 and 2.
+
+```{r, echo=TRUE}
+
+wl1 = subset(diet_elim, diet == "1");
+wl2 = subset(diet_elim, diet == "2");
+wl3 = subset(diet_elim, diet == "3");
+
+t.test(wl3$weight.loss, wl1$weight.loss, alternative = "greater")
+t.test(wl3$weight.loss, wl2$weight.loss, alternative = "greater")
+
+```
+Since the $p$-values are smaller than 0.05, we reject the null hypothesis that
+the means are the same so diet 3 is more effective than 1 and 2.
+
+
+### c)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
