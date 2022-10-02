@@ -248,16 +248,75 @@ the means are the same so diet 3 is more effective than 1 and 2.
 
 ### c)
 
+We use two-way anova to investigate the effect of diet, gender, and their interaction
+on weight loss
+
+```{r, echo=TRUE}
+
+tw_aov1 <- aov(weight.loss ~ diet * gender, data=diet_elim);
+
+summary(tw_aov1)
+
+```
+The $p$-values for gender and interaction between diet and gender are larger 
+than 0.05 so there are no statistical significance for their effects on 
+weight loss as opposed to diet alone.
+
+### d)
+We investigate the effect of diet and height using ANCOVA. We test the hypothesis
+$H_{A}: \alpha_i = \dots = \alpha_I = 0$
+```{r, echo=TRUE}
+
+anc1 <- lm(weight.loss ~ height + diet, data=diet_elim);
+
+anova(anc1)
 
 
+```
+The $p$-value is smaller than 0.05 so we reject the null hypothesis that the diet 
+does not affect the weight loss. Similarly, we test for $H_{\beta}: \beta = 0$.
+
+```{r, echo=TRUE}
+
+anc2 <- lm(weight.loss ~ diet + height, data=diet_elim);
+
+anova(anc2)
 
 
+```
+The $p$-value is larger than 0.49 so we can not reject the null hypothesis that
+the height does not have an effect.
+The interaction between diet and height us subsequently tested.
+
+```{r, echo=TRUE}
+
+anc3 <-  lm(weight.loss ~ height * diet, data=diet_elim);
+
+anova(anc3)
+
+```
+The $p$-value for the interaction effect is larger than 0.05 so it does not bear
+any statistical significant effect towards weight loss. Furthermore, for the 3 types 
+of diet, the effect of height is the same because of the hypothesis 
+$H_{A \beta}: \beta_i = \dots = \beta_I$ and we did not reject it.
+
+### e)
+Out of two approaches, we prefer the b) one because in d), the height and the interaction
+effects statistically do not effect weight loss. Since diet is the only (tested) 
+factor to have a significant effect on weight loss, we can do a simple linear regression
+model.
+
+```{r, echo=TRUE}
+
+lm.model <- lm(weight.loss ~ diet, data=diet_elim)
+
+summary(lm.model)
 
 
-
-
-
-
+```
+So, based on the model, the lost weight of an average person only depend on their 
+chosen diet and can be given as 
+$$lost\_weight = 1.9 +  0.9 \times diet.$$
 
 
 
