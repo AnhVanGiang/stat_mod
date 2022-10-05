@@ -277,6 +277,18 @@ Note that if we conduct the one way ANOVA test with the two variables separately
 the "block" variable does not seem to be significant enough for our analysis.
 Moreover, the analogous test for the "N" variable outputs a p-value that indicates that the use of nitrogen is really significant.
 
+### c)
+
+```{r, echo=TRUE}
+
+cmod = lm(yield ~ N + K + N*block, data=npk)
+anova(cmod)
+
+```
+Among all tests between different combinations of the factors, each containging at
+least one interaction term with "block", 
+this one appears to be the best because the $p$-values are significant 
+for factors N and K but not for the interaction term
 ## Question 6
 ```{r, echo=TRUE}
 
