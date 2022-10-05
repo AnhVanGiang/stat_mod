@@ -228,7 +228,45 @@ than 0.05, and because we the normal distribution assumption holds, the location
 are the means.
 
 ## Question 5
+### a) Plot of average yield per block, distinguishing between using or not using nitrogen
+```{r, echo=TRUE}
+utils::data(npk, package="MASS")
+utils::data(npk, package="MASS")
+npk_nitro = npk[npk$N == 1,]
+npk_nonnitro = npk[npk$N == 0,]
+bck = matrix(0,6,2)
 
+for (i in 1:6)
+  {
+  bck[i,1] = mean(npk_nitro[npk_nitro$block == i,]$yield)
+  bck[i,2] = mean(npk_nonnitro[npk_nonnitro$block == i,]$yield)
+}
+
+df = data.frame(bck[1,], bck[2,], bck[3,], bck[4,], bck[5,], bck[6,])
+colnames(df) = c("Block 1", "Block 2", "Block 3", "Block 4", "Block 5", "Block 6")
+
+barplot((as.matrix(df)),
+        beside=TRUE,
+        main = "Average yield per block \n(with and without nitrogen)")
+
+### b) Two way ANOVA full test
+```{r, echo=TRUE}
+mod.full=lm(yield ~ block*N, data = npk) 
+anova(mod.full)
+## H0: no interaction versus H1: there is an interaction 
+## H0: smaller model holds versus H1: smaller model is not true 
+```
+The p-values for both "block" and "N" are small enough for being significant for us. However, the value for the interaction is clearly above the significant level, so we cannot reject that the interaction between "block" and "N" does not exist (i.e. we do not have enough evidence of the existance of interaction). 
+
+```{r, echo=TRUE}
+mod.full=lm(yield ~ block, data = npk)   # full model
+anova(mod.full)
+```
+```{r, echo=TRUE}
+mod.full=lm(yield ~ block, data = npk)   # full model
+anova(mod.full)
+```
+Note that if we conduct the one way ANOVA test with the two variables by separate, the "block" variable does not seem to be significant enough for our analysis. Moreover, the analogous test for the "N" variable outputs a p-value that indicates that the use of nitrogen is really significant.
 
 ## Question 6
 ```{r, echo=TRUE}
