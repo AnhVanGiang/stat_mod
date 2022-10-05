@@ -1,17 +1,118 @@
 ---
 title: "Assignment 1"
-output: pdf_document
 date: "`r Sys.Date()`"
+output:
+  pdf_document:
+    includes:
+      in_header: preample.tex
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
 library(afex)
 library(performance)
 library(magrittr)
 library(plyr)
 library(EnvStats)
+hook_output <- knit_hooks$get('output')
+knit_hooks$set(output = function(x, options) {
+  if (!is.null(n <- options$out.lines)) {
+    n <- as.numeric(n)
+    x <- unlist(stringr::str_split(x, "\n"))
+    nx <- length(x) 
+    x <- x[pmin(n,nx)]
+    if(min(n) > 1)  
+      x <- c(paste(options$comment, "[...]"), x)
+    if(max(n) < nx) 
+      x <- c(x, paste(options$comment, "[...]"))
+    x <- paste(c(x, "\n"), collapse = "\n")
+  }
+  hook_output(x, options)
+    })
 ```
+## Question 1
+### a) 
+
+We have $\hali = \frac{1}{n} \sum_{j=1}^{n} Y_{ij}$ so 
+    \[ \ex[\hali] = \frac{1}{n} \sum_{j=1}^{n} \ex[Y_{ij}] =  \frac{1}{n} \sum_{j=1}^{n} \alpha_i = \alpha_i.  \]
+    Thus $\hali$ is an ubiased estimator. 
+
+### b) 
+
+We have
+    \begin{align*}
+        \var(\hali) &= \var \left(\frac{1}{n} \sum_{j=1}^{n} Y_{ij} \right) \\
+        &= \frac{1}{n^2} \sum_{j=1}^{n} \var(Y_{ij}) &&\text{since $Y_{ij}$ are i.i.d}\\
+        &= \frac{1}{n^2} \sum_{j=1}^{n} [\var(\alpha_i) + \sigma^2]\\
+        &= \frac{\var(\alpha_i) + \sigma^2}{n}.
+    \end{align*}
+    
+If $i = j$, we have 
+    
+\[ \var(\hali - 2\halj) = \var(- \hali) = \var(\hali) = \frac{\var(\alpha_i + \sigma^2)}{n}. \]
+Otherwise if $i \neq j$, then 
+
+\begin{align*}
+    \var(\hali - 2\halj) &= \var \left(\frac{1}{n} \sum_{j=1}^{n} Y_{ij} - \frac{2}{n} \sum_{i=1}^{n} Y_{ij}  \right)\\
+    &= \frac{1}{n^2} \sum_{j=1}^n \var(Y_{ij}) + \frac{4}{n^2} \sum_{j=1}^n \var(Y_{ij})\\
+    &= \frac{5}{n^2}\sum_{j=1}^n \var(Y_{ij})\\
+    &= \frac{5 (\var(\hali) + \sigma^2)}{n}.
+\end{align*}
+
+### c) 
+We have
+\begin{align*}
+    \ex[S_{\Omega} - 3S_{\omega}] &= \ex[S_{\Omega}  - S_{\omega} - 2S_{\omega}]\\
+    &= \ex[S_{\Omega} - S_{\omega}] - 2\ex[S_{\omega}]\\
+    &= I - 1 - 2(n - 1).
+\end{align*}
+
+Similarly, 
+
+\begin{align*}
+    \ex[3S_{\Omega} - 5S_{\omega}] &= \ex[3(S_{\Omega} - S_{\omega}) - 2S_{\omega}]\\
+    &= 3\ex[S_{\Omega} - S_{\omega}] - 2\ex[S_{\omega}]\\
+    &= 3(I - 1) - 2(n-1).
+\end{align*}
+
+## Question 2
+
+### a) 
+
+Using the $\mu^{st} = 0$ parametrization, we have 
+\[ \hali^{st} = \frac{1}{n_i} \sum_{j=1}^{n_i} Y_{ij} = \Bar{Y}_{i \cdot} = \hali^{tr} + \hat{\mu}^{tr}  \]
+and 
+
+\[ \hm^{st} = 0. \]
+
+### b) 
+
+We have 
+\[ \hm^{sum} = \frac{1}{I} \sum_{i=1}^{I} \frac{1}{n_i} \sum_{j=1}^{n_i} Y_{ij} = \frac{1}{I} \sum_{i=1}^{I} \hali^{tr}  \]
+    and 
+\[ \hali^{sum} = \Bar{Y}_{i \cdot} - \Bar{Y}_{\cdot \cdot} = \hali^{tr} - \hm^{sum}. \]
+
+### c) 
+
+We have 
+\[ \hm^{sum} = \frac{1}{I} \sum_{i=1}^{I} \frac{1}{n_i} \sum_{j=1}^{n_i} Y_{ij} = \frac{1}{I} \sum_{i=1}^{I} \hali^{tr}  \]
+    and 
+\[ \hali^{sum} = \Bar{Y}_{i \cdot} - \Bar{Y}_{\cdot \cdot} = \hali^{tr} - \hm^{sum}. \]
+
+## Question 3
+
+### a)
+
+Using the formula $\hat{\gamma}_{ij} = Y_{ij.} - Y_{i..} - Y_{.j.} + Y_{...} $, we can estimate $\hat{\gamma}$. This is:
+        \begin{equation*}
+            \mathds{E}(\hat{\gamma}_{ij}) = \mathds{E}(Y_{ij.}) - \mathds{E}(Y_{i..}) - \mathds{E}(Y_{.j.}) + \mathds{E}(Y_{...})
+            \n
+        \end{equation*}
+        \begin{align*}
+        \ex[3S_{\Omega} - 5S_{\omega}] &= \ex[3(S_{\Omega} - S_{\omega}) - 2S_{\omega}]\\
+        &= 3\ex[S_{\Omega} - S_{\omega}] - 2\ex[S_{\omega}]\\
+        &= 3(I - 1) - 2(n-1).
+    \end{align*}
 
 ## Question 4
 
@@ -70,7 +171,7 @@ The normality of residuals with expectation zero are checked using QQ-plot,
 Shapiro-Wilk test, and one-sample t-test because the true standard deviation is not
 known.
 
-```{r, echo=TRUE}
+```{r, echo=TRUE, out.lines=2:6}
 plot.new()
 res <- Y - c(rep(beta, 1, each=50));
 qqnorm(res)
@@ -200,7 +301,7 @@ The two $p$-values are higher than 0.05 thus we can safely assume that they do
 not significantly differ from normal distribution and the two samples $t$-test can
 be used.
 
-```{r, echo=TRUE}
+```{r, echo=TRUE, out.lines=2:6}
 
 t.test(diet_elim$preweight, diet_elim$weight6weeks)
 
@@ -232,7 +333,7 @@ but $preweight$ and $weight6weeks$ are normally distributed so we can assume tha
 $weight.loss$ is also normally distributed and the $t$-test can be used. We 
 check if diet 3 is more effective than 1 and 2.
 
-```{r, echo=TRUE}
+```{r, echo=TRUE, out.lines=c(2:6, 13:17)}
 
 wl1 = subset(diet_elim, diet == "1");
 wl2 = subset(diet_elim, diet == "2");
@@ -306,7 +407,7 @@ effects statistically do not effect weight loss. Since diet is the only (tested)
 factor to have a significant effect on weight loss, we can do a simple linear regression
 model.
 
-```{r, echo=TRUE}
+```{r, echo=TRUE, out.lines=9:12}
 
 lm.model <- lm(weight.loss ~ diet, data=diet_elim)
 
