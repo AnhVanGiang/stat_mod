@@ -1,0 +1,87 @@
+---
+title: "Assignment 2"
+output: pdf_document
+date: "`r Sys.Date()`"
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+library(afex)
+library(performance)
+library(magrittr)
+library(plyr)
+library(EnvStats)
+hook_output <- knit_hooks$get('output')
+knit_hooks$set(output = function(x, options) {
+  if (!is.null(n <- options$out.lines)) {
+    n <- as.numeric(n)
+    x <- unlist(stringr::str_split(x, "\n"))
+    nx <- length(x) 
+    x <- x[pmin(n,nx)]
+    if(min(n) > 1)  
+      x <- c(paste(options$comment, "[...]"), x)
+    if(max(n) < nx) 
+      x <- c(x, paste(options$comment, "[...]"))
+    x <- paste(c(x, "\n"), collapse = "\n")
+  }
+  hook_output(x, options)
+    })
+```
+## Question 1
+```{r, echo=FALSE}
+
+tstat = (4-2)/(1.1)^(1/2);
+crit_val = qt(0.1/2, 100-3, lower.tail = FALSE);
+```
+### a) 
+
+The test statistic for the hypothesis is 
+\[ T = \frac{\hat{\theta_3} - 2}{\sqrt{\hat{\Sigma}_{3,3}}} = \frac{4 - 2}{\sqrt{1.1}} = `r tstat`. \]
+Since $`r tstat` > t_{97, 0.95} = `r crit_val`$ so we reject $H_0$. 
+
+### b) 
+
+Let $\alpha=0.05$, the $95\%$ confidence interval is 
+\[ \hat{\theta_3} \pm t_{97,0.975} \sqrt{\hat{\Sigma}_{3,3}} = 4 \pm 1.98 \times1.04 = [1.94, 6.05].  \]
+
+### c) 
+
+We have the statistic 
+\[ T = \frac{f(0, \hat{\theta})}{\sqrt{\hat{v}_x^{T} \hat{\Sigma} \hat{v}}} = \frac{0.54}{0.85} = 0.63  \]
+which is lower than $t_{97,0.975}$ so we can not reject $H_0$. 
+
+### d) 
+
+The $95\%$ confidence interval is 
+\[ f(0, \hat{\theta}) \pm t_{97,0.975} \times \sqrt{\hat{v}_x^{T} \hat{\Sigma} \hat{v}} = [-1.14, 2.22]. \]
+
+### e) 
+Since the dataset with the funtion $f(x, \theta)$, we can compute the matrix $\hat{V}$ where
+\[ \hat{V}_{ij}  = \partial f(x_i, \hat{\theta})/\partial \theta_j. \]
+Thus, we can compute $(\hat{V}^{T} \hat{V})^{-1}$ and 
+\[ \hat{\sigma}^2 = \hat{\Sigma}(\hat{V}^{T} \hat{V})  \]
+where $\hat{\Sigma}$ is the given estimated covariance matrix.
+
+## Question 2
+### a) 
+The estimates of $\theta$ are $\hat{\theta} = (0.81, -0.44, 1.98, 1.27)$ and 
+$\hat{\sigma}^2 = \frac{S(\hat{\theta})}{n - p}$ where $S(\hat{\theta}) = RSE^2 (n - p)$
+where $RSE$ is the residual standard error. Thus, we have $\hat{\sigma}^2 = RSE^2 = 0.275$.
+The residual sum of squares can be recovered from the residual standard error and
+the degree of freedoms because 
+\[ RSE = \sqrt{\frac{RSS}{n - p}} \]
+where $p$ is the number of parameters $\theta$, which in this case, is 4. 
+
+### b) 
+We first obtain the estimated covariance matrix or just the values on the diagonal of $\hat{\Sigma}$ using $x_i = \frac{3(i - 1)}{n - 1}$ 
+with $n = 100$ and the partial derivatives $\partial f(x_i, \hat{\theta})/\partial \theta_j$.
+Note that the partial derivatives calculations are quite straightforward so they will be omitted.
+We have $\hat{\Sigma}_{1,1} = 0.114$, $\hat{\Sigma}_{2,2} = 0.028$,
+$\hat{\Sigma}_{3,3} = 0.0076$, and $\hat{\Sigma}_{4,4} = 0.1104$. 
+Like before, we have the test statistic
+\[ T = \frac{0.8}{\sqrt{0.114}} = 2.37 > t_{96,1 - 0.05/2} = 1.984\]
+so we reject $H_0$. The $95\%$ confidence interval is 
+\[ \hat{\theta_1} \pm t_{96,1 - 0.05/2} \sqrt{\hat{\Sigma}_{1,1}} = 0.81 \pm 1.984 \times 0.337 = [0.141, 1.478].\]
+
+### c) 
+
