@@ -84,4 +84,21 @@ so we reject $H_0$. The $95\%$ confidence interval is
 \[ \hat{\theta_1} \pm t_{96,1 - 0.05/2} \sqrt{\hat{\Sigma}_{1,1}} = 0.81 \pm 1.984 \times 0.337 = [0.141, 1.478].\]
 
 ### c) 
+Likewise, we have the statistic
+\[ T = \frac{\hat{\theta_4} - 1}{\sqrt{\hat{\Sigma}_{4,4}}} = 0.81 < t_{96,1 - 0.05/2} \]
+so we can not reject $H_0$. Let $\alpha = 0.02$ then the $98\%$ confidence interval is 
+\[  \hat{\theta_2} \pm t_{96,1 - 0.02/2} \sqrt{\hat{\Sigma}_{2,2}} = -0.44 \pm 2.36 \times 0.028 = [-0.5, -0.37]. \]
+
+### d) 
+
+
+### e) 
+Let the global model $\Omega$ be the full model, i.e, $S({\hat{\theta_q}}) = \min_{\theta_q} || Y - f_{\Omega}(x, \theta_q) ||^2$, where $\theta_q \in \mathbb{R}^q$, and 
+the linear submodel to be $\omega: S({\hat{\theta_p}}) = \min_{\theta_p} || Y - f_{\omega}(x, \theta_p) ||^2$
+where $\theta_p \in \mathbb{R}^{p}$ with $p < q$ such that $f_{\omega}(x, \theta_p)$ is linear. 
+We can test for $H_0$ that the linear submodel fits well at significance level $\alpha$
+by using the test statistic 
+\[ V = \frac{[S({\hat{\theta_p}}) - S({\hat{\theta_q}})]/(q - p)}{S({\hat{\theta_q}})/(n - q)}. \]
+If $V > F_{q - p, n - q,1 - \alpha}$ then we reject $H_0$ that the linear submodel fits well. 
+
 
