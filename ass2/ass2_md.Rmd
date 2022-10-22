@@ -9,6 +9,8 @@ library(knitr)
 library(afex)
 library(performance)
 library(magrittr)
+library(MASS)
+library(ggplot2)
 library(plyr)
 library(EnvStats)
 hook_output <- knit_hooks$get('output')
@@ -105,43 +107,143 @@ If $V > F_{q - p, n - q,1 - \alpha}$ then we reject $H_0$ that the linear submod
 ## Question 3
 ### a)
 
-```{r setup, include=FALSE}
-# prepare data
-N = 100
-x = runif(N,0,4)
+## Question 4
+### a) 
 
-theta = c(1, 2, 0.7)
-sigma = 0.5
-eps = rnorm(N, 0, sigma)
-
-f <- function(x) {
-  return(theta[1] * x + theta[2] / (theta[3] + 3*x^2))
-} 
-
-y = x # simulated observations
-ftrue = x # true values
-for (i in 1:N) {
-  y[i] = f(x[i]) + eps[i]
-  ftrue[i] = f(x[i])
-  }
-
-plot(x, y)
-
-#plot function
-xx <- seq(0,4,0.1)
-plot(xx, f(xx), type="l")
-
-
-y
-
-
-
-
-
-form=as.formula(y~ theta1*x + theta2/(theta3+3*x^2))
-
-plot(x,y,xlab="Values for x",ylab="Values for y") # plot of dataset
-
-nmodel=nls(form,data=y,start=c(theta1=theta[1],theta2=theta[2],theta3=theta[3])) 
+```{r, include=TRUE, echo=TRUE, out.lines=1:13}
+stormer <- data.frame(stormer);
+smod_lin <- lm(Wt * Time ~ Viscosity + Time, data = stormer);
+summary(smod_lin)
 ```
+Fitting the linear regression $wT = \theta_1 v + \theta_2T + (w - \theta_2)\varepsilon$
+returns the estimates $\hat{\theta}_1 = 28$ and $\hat{\theta}_2 = 2$ which we will use 
+for the initial values of the non-linear regression. 
+
+```{r, include=TRUE, echo=TRUE, out.lines=1:9}
+n = nrow(stormer);
+p = 2;
+smod.nls <- nls(Time ~ (the1 * Viscosity)/(Wt - the2),
+               data = stormer, 
+               start=c(the1=28, the2=2)
+               );
+RSS=deviance(smod.nls);
+smod.evar <- round(RSS/(n - p), 2);
+summary(smod.nls)
+```
+Applying non-linear regression, we have the estimates for $(\theta_1, \theta_2)$
+as $(\hat{\theta}_1, \hat{\theta}_2) = (29.4, 2.2)$ which are very close to the 
+inital values.The estimated variance of the error $\hat{\sigma}^2 = `r smod.evar`$.
+To test for the validity of the model's assumptions, we use residual plot and the 
+qq plot, Shapiro-Wilk test to check for the normality of the residual.
+
+```{r, include=TRUE, echo=TRUE}
+plot(fitted(smod.nls), resid(smod.nls), xlab="Fitted values", ylab="Residuals");
+abline(0, 0)
+
+qqnorm(resid(smod.nls))
+qqline(resid(smod.nls))
+
+shapiro.test(resid(smod.nls))
+
+```
+It can be seen that the pattern of the points are somewhat random so the non-linear 
+model is somewhat good. Since the $p$-value of the Shapiro-Wilk test is 0.55,
+which is higher than 0.05, we reject the null hypothesis that the data is not 
+normally distributed. The QQ-plot also confirms the normality assumption. 
+
+### b) 
+
+```{r, include=TRUE, echo=FALSE}
+
+smod.cov = vcov(smod.nls);
+T <- (2.2 - 2)/(sqrt(smod.cov[2,2]));
+
+```
+Calculate the test statistic $T$ using the covariance matrix, we have that 
+$T = `r T` < t_{21, 1 - 0.05/2} = 2.08$ so we can not reject $H_0$. 
+
+
+### c) 
+```{r, include=TRUE, echo=TRUE}
+
+lb=numeric(2); ub=numeric(2);
+for(i in 1:2) {lb[i]=coef(smod.nls)[i]-qt(0.975,n-length(coef(smod.nls)))*sqrt(smod.cov[i,i])
+      ub[i]=coef(smod.nls)[i]+qt(0.975,n-length(coef(smod.nls)))*sqrt(smod.cov[i,i])}
+ci=cbind(lb,ub); rownames(ci)=names(coef(smod.nls)); ci
+
+```
+The $95\%$ confidence interval for $\hat{\theta}_1$ is $[27.49, 31.3]$ and $\hat{\theta}_2$
+is $[0.83, 3.6]$.
+
+### d)
+``` {r, include=TRUE, echo=TRUE}
+
+grad<-function(v,w,the){rbind(v/(w - the[2]), the[1]*v/(w - the[2])^2)};
+gradvec <- grad(100, 60, coef(smod.nls));
+
+se=sqrt(t(gradvec)%*%vcov(smod.nls)%*%gradvec);
+f <- function(v, w, the) { the[1]*v/(w - the[2]) };
+f4 <- f(100, 60, coef(smod.nls))
+
+lb=f4-qt(0.05/2,n-length(coef(smod.nls)), lower.tail=FALSE)*se
+ub=f4+qt(0.05/2,n-length(coef(smod.nls)), lower.tail=FALSE)*se
+
+c(lb, ub)
+
+```
+The $95\%$ confidence interval for the expected value of $T$ is therefore $[48.65, 53.1]$.
+
+### e) 
+```{r, include=TRUE, echo=TRUE}
+
+form2 <- as.formula(Time ~ (the1 * Viscosity)/(Wt));
+smod.nls2 <- nls(form2, data=stormer, start=c(the1=28));
+anova(smod.nls, smod.nls2)
+
+```
+Using ANOVA, the reduced model gives a worse fit than the full one since its 
+residual sum of squares is $1210 > 825.05$. We also calculate the $V$ statistic 
+to compare against the $F$-distribution.
+
+```{r, include=TRUE, echo=TRUE}
+
+SSq <- deviance(smod.nls);
+SSp <- deviance(smod.nls2);
+
+n <- length(resid(smod.nls)); 
+q<- length(coef(smod.nls)); 
+p <- length(coef(smod.nls2)) 
+
+fstat <- ((SSp-SSq)/(q-p))/(SSq/(n-q));
+pval <- 1 - pf(fstat, q-p, n-p);
+```
+The obtained $F$-statistic is $`r fstat` > F_{1, 21, 0.95} = 4.32$  
+and its $p$-value is $`r pval` < 0.05$ so we reject the null hypothesis $H_0$ that 
+the smaller model $\omega$ is appropriate. 
+
+```{r, include=TRUE, echo=TRUE}
+
+AIC(smod.nls)
+AIC(smod.nls2)
+
+
+```
+The AIC of the full model is $153.6$ while the AIC for the smaller one is $160.4$. Clearly,
+$153 < 160$ so the full model fits better. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
