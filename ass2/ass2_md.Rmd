@@ -241,6 +241,13 @@ segments(x,lb,x,ub,col="grey") # confidence intervals
 
 ### e)
 
+```{r, include=TRUE, echo=TRUE, out.lines=1:13}
+U = coef(nmodel)[1] - coef(nmodel)[2]
+t = U / sqrt((cov.est[1,1] + cov.est[2,2] - 2 * cov.est[1,2]^2))
+pval = 2 * U * qt(abs(t), df = N-2)
+pval
+```
+
 ## Question 4
 ### a) 
 
