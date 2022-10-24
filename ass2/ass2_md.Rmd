@@ -241,11 +241,18 @@ segments(x,lb,x,ub,col="grey") # confidence intervals
 
 ### e)
 
+The test, with $\alpha = 0.05$, can be done in the following way: let $U = \hat{theta_1} - \hat{theta_2}$, so our null hypothesis will be $H_0: U=0$, to contrast with the alternative $H_1: U \neq 0$. From the way $U$ is defined, we can do the following: $U = \hat{theta_1} - \hat{theta_2} = \hat{theta_1} - \hat{theta_2} = \hat{theta_1} - \bm{\theta} + \bm{\theta} - \hat{theta_2} = (\hat{theta_1} - \bm{\theta}) - (\hat{theta_2} - \bm{\theta})$.
+
+Note that $(\hat{theta_1} - \bm{\theta})$ and $(\hat{theta_2} - \bm{\theta})$ are, under $H_0$, both normally distributed with mean $0$ and variance $\Sigma^2$, where $\Sigma$ is the covariance matrix obtained before. Therefore, $U \sim N(0, V)$. Where the variance $V$ can be expressed in the following terms: $Var(U) = Var(\hat{theta_1} - \hat{\theta_2}) = \Sigma_{11} + \Sigma_{22} - \Sigma_{12}^2. 
+
+The statistic $t_U = U / \sqrt(V)$ will follow a $t-distribution$ with $100-3$ degrees of freedom. Finally, the $p$-value for this two-sided test will be given by $p_U = t_{97}(|t_U|).
+
 ```{r, include=TRUE, echo=TRUE, out.lines=1:13}
 U = coef(nmodel)[1] - coef(nmodel)[2]
 t = U / sqrt((cov.est[1,1] + cov.est[2,2] - 2 * cov.est[1,2]^2))
 pval = pt(abs(t), df = 97, lower.tail = FALSE)
 ```
+Given that $p_U$ turned out to be smaller than $\alpha = 0.05$, we have sufficient evidence to reject $H_0$ for this confidence level.
 
 ## Question 4
 ### a) 
