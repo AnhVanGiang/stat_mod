@@ -107,25 +107,23 @@ If $V > F_{q - p, n - q,1 - \alpha}$ then we reject $H_0$ that the linear submod
 ## Question 3
 ### a)
 
-```{r, include=FALSE, echo=TRUE, out.lines=1:13}
+```{r, include=TRUE, echo=TRUE, out.lines=1:13}
 N = 100
 x = runif(N,0,4)
 theta = c(2, 3, 1)
 sigma = 0.5 #sigma_sq = 0.25
 eps = rnorm(N, 0, sigma)
 f <- function(x) {return(theta[1] * x + theta[2] / (theta[3] + 3*x^2))} 
-y = x # simulated observations
 ftrue = x # true values
-for (i in 1:N) {
-  y[i] = f(x[i]) + eps[i]
-  ftrue[i] = f(x[i])
-  }
+y <- f(x) + eps;
+ftrue <- f(x);
+
 form=as.formula(y ~ theta1*x + theta2/(theta3+3*x^2))
 dfy = data.frame(y)
 dfy['x'] = x
 ```
 
-In this question, we need to artificcially generate our data. We will take $x_i \in [0,4]$ with $i = 1, \dots ,100$ and our function $f(x,  \bm{\theta}) = \theta_1 x + \theta_2 / (\theta_3 + 3 x^2). To our simulated response we have added an error term $\epsilon_i \sim N(0, \sigma^2)$ such that $y_i = f(x_i) + e_i$. Here, we chose $\bm{\theta} = (2, 3, 1)$ and $\sigma = 0.5$. The following plot illustrates the dataset.
+In this question, we need to artificially generate our data. We will take $x_i \in [0,4]$ with $i = 1, \dots ,100$ and our function $f(x,  \theta) = \theta_1 x + \theta_2 / (\theta_3 + 3 x^2)$. To our simulated response we have added an error term $\epsilon_i \sim N(0, \sigma^2)$ such that $y_i = f(x_i) + \varepsilon_i$. Here, we chose $\theta = (2, 3, 1)$ and $\sigma = 0.5$. The following plot illustrates the dataset.
 
 
 ```{r, include=TRUE, echo=TRUE, out.lines=1:13}
@@ -135,40 +133,41 @@ plot(x,y,
      main='Plotting simulated values agains true values') # plot of dataset
 ```
 
-Now, we estimate the parameter $\bm{\theta}$ by means of a non-linear model. The model's summary will give us our first insights about the quality of our estimation.
+Now, we estimate the parameter $\theta$ by means of a non-linear model. The model's summary will give us our first insights about the quality of our estimation.
 
 ```{r, include=TRUE, echo=TRUE, out.lines=1:13}
 nmodel=nls(form,data=dfy,start=c(theta1=theta[1],theta2=theta[2],theta3=theta[3])) 
 hat.th=coef(nmodel); hat.th ## the LSE estimates of theta's
 summary(nmodel) # more informative output
 ```
-Indeed, we can observe that our estimates seem to be quite accurate, but not to the same extent for the three dimensions of $\bm{\theta}$, yet the estimation for $\theta_2$ seems to be slightly more off with respect to the other two dimesions of $\bm{\theta}$.
+Indeed, we can observe that our estimates seem to be quite accurate, but not to the same extent for the three dimensions of $\theta$, yet the estimation for $\theta_2$ seems to be slightly more off with respect to the other two dimesions of $\theta$.
 
 If we see our estimate for the error's variance, we will see that it does give a relatively good estimation (although that obviously depends on the context of the data:
 
-```{r, include=FALSE, echo=TRUE, out.lines=1:13}
+```{r, include=TRUE, echo=TRUE, out.lines=1:13}
 RSS=deviance(nmodel);RSS # the same info in nmodel
 y_var=RSS/(N-2) 
 y_var
 ```
 Similarly, here we have our covariance matrix using our estimates:
-```{r, include=FALSE, echo=TRUE, out.lines=1:13}
+```{r, include=TRUE, echo=TRUE, out.lines=1:13}
 cov.est=vcov(nmodel)
 cov.est
 ```
 
-Finally, we can feet our estimate function, i.e. $f(x, \bm{\hat{\theta}}$, in the plot.
+Finally, we can use our estimate function, i.e. $f(x, \hat{\theta})$, in the plot.
 
-```{r, include=FALSE, echo=TRUE, out.lines=1:13}
-f=function(x,theta)return(theta[1] * x + theta[2] / (theta[3] + 3*x^2))
-coef(nmodel) # estimates for theta
-x=seq(from=0,to=4,length.out=N)
-lines(x,f(x,coef(nmodel)),col="red")  # fitted curve
+```{r, include=TRUE, echo=TRUE, out.lines=1:13}
+f=function(x,theta){return(theta[1] * x + theta[2] / (theta[3] + 3*x^2))}
+ggplot(data=dfy, aes(x=x, y=y)) + 
+  geom_point() + 
+  geom_smooth(se=FALSE, formula = y ~ f(x, theta), color="red", fill="lightblue")
+
 ```
 
 ### b)
 
-The 98% level confidence interval for $\bm{theta} = (\theta_1, \theta_2, \theta_3)$ can be directly computed by assymptotic normality and will yield the following intervals:
+The 98% level confidence interval for $\theta = (\theta_1, \theta_2, \theta_3)$ can be directly computed by asymptotic normality and will yield the following intervals:
 
 ```{r, include=TRUE, echo=TRUE, out.lines=1:13}
 lb=numeric(3); ub=numeric(3); # rownames(lb)=names(coef(nmodel))
@@ -179,7 +178,7 @@ ci
 ```
 Also, we can compute confidence intervals of the same confidence level by means of the bootstrap method:
 
-```{r, include=FALSE, echo=TRUE, out.lines=1:13}
+```{r, include=TRUE, echo=TRUE, out.lines=1:13}
 B=1000 # 1000
 par.boot=matrix(NA,B,length(coef(nmodel)))
 rownames(par.boot)=paste("B",1:B,sep="")
@@ -198,15 +197,14 @@ for(b in 1:B){
   # Store estimated (by bootstrap) parameters  
   par.boot[b,]=coef(modelBoot) #\theta*_1,..., \theta*_B
 }
-```
-```{r, include=TRUE, echo=TRUE, out.lines=1:13}
+
 lb.boot=2*coef(nmodel)-apply(par.boot,2,quantile,prob=0.98)
 ub.boot=2*coef(nmodel)-apply(par.boot,2,quantile,prob=0.02)
 cbind(lb.boot,ub.boot)
 ```
 ### c)
 
-Let's see the expected value for $Y$ when $x=3$ in a $98\%$ confidence interval. Note that both the actual value of $f(3, \theta) and our estimate are included in the interval. This should not be surprising, yet we are looking at a relatively high confidence level.
+Let's see the expected value for $Y$ when $x=3$ in a $98\%$ confidence interval. Note that both the actual value of $f(3, \theta)$ and our estimate are included in the interval. This should not be surprising, yet we are looking at a relatively high confidence level.
 
 ```{r, include=TRUE, echo=TRUE, out.lines=1:13}
 f3=f(3,coef(nmodel))
@@ -225,34 +223,34 @@ c(lb,ub)
 
 This can be done for all $x \in [0,4]$. To gain some insight, we will make use of the plot seen before but this time including the confidence intervals.
 
-```{r, include=FALSE, echo=TRUE, out.lines=1:13}
-x=seq(from=0,to=4,length.out=N)
-fe=f(x,coef(nmodel)) # or: fe=predict(nmodel,newdata=data.frame(conc=x))
+```{r, include=TRUE, echo=TRUE, out.lines=1:13}
+fe=f(sort(x),coef(nmodel)) # or: fe=predict(nmodel,newdata=data.frame(conc=x))
 mygrad=grad(x,coef(nmodel)) # estimated gradients for x's from [0,4]
 se<-sqrt(apply(mygrad,2,function(xx) t(xx)%*%vcov(nmodel)%*%xx))
 lb<-fe-qt(0.99,N-length(coef(nmodel)))*se 
 ub<-fe+qt(0.99,N-length(coef(nmodel)))*se
-```
-```{r, include=TRUE, echo=TRUE, out.lines=1:13}
-plot(dfy['x'],f(x,theta),xlab="the x",ylab="the y") # data
-lines(x,fe,t="l",lwd=0.5,col="red") # fitted curve
-segments(x,lb,x,ub,col="grey") # confidence intervals
+
+plot(dfy[, 'x'],f(x,coef(nmodel)),xlab="X",ylab="Y"); # data
+lines(sort(x),fe,t="l",lwd=0.5,col="red"); # fitted curve
+segments(sort(x),lb,sort(x),ub,col="lightblue") # confidence intervals
 ```
 
 ### e)
 
-The test, with $\alpha = 0.05$, can be done in the following way: let $U = \hat{theta_1} - \hat{theta_2}$, so our null hypothesis will be $H_0: U=0$, to contrast with the alternative $H_1: U \neq 0$. From the way $U$ is defined, we can do the following: $U = \hat{theta_1} - \hat{theta_2} = \hat{theta_1} - \hat{theta_2} = \hat{theta_1} - \bm{\theta} + \bm{\theta} - \hat{theta_2} = (\hat{theta_1} - \bm{\theta}) - (\hat{theta_2} - \bm{\theta})$.
+The test, with $\alpha = 0.05$, can be done in the following way: let $U = \hat{\theta_1} - \hat{\theta_2}$, so our null hypothesis will be $H_0: U=0$, to contrast with the alternative $H_1: U \neq 0$. From the way $U$ is defined, we can do the following: $U = \hat{\theta}_1 - \hat{\theta_2} = \hat{\theta_1} - \theta + \theta - \hat{\theta_1} = (\hat{\theta_1} - \theta) - (\hat{\theta_2} - \theta)$.
 
-Note that $(\hat{theta_1} - \bm{\theta})$ and $(\hat{theta_2} - \bm{\theta})$ are, under $H_0$, both normally distributed with mean $0$ and variance $\Sigma^2$, where $\Sigma$ is the covariance matrix obtained before. Therefore, $U \sim N(0, V)$. Where the variance $V$ can be expressed in the following terms: $Var(U) = Var(\hat{theta_1} - \hat{\theta_2}) = \Sigma_{11} + \Sigma_{22} - \Sigma_{12}^2. 
+Note that $(\hat{\theta_1} - \theta)$ and $(\hat{\theta_2} - \theta)$ are, under $H_0$, both normally distributed with mean $0$ and variance $\Sigma$, where $\Sigma$ is the covariance matrix. Therefore, $U \sim N(0, \Sigma)$. Note that $\hat{\Sigma}_{kk} = Var(\hat{\theta_k}) = Var(\hat{\theta_k} - a)$ in the usual situation, doing the same thing for $U$, we have 
+\[ Var(U) = Var(\hat{\theta_1} - \hat{\theta_2}) = Var(\hat{\theta_1}) + Var(\hat{\theta_1}) -2Cov(\hat{\theta_1}, \hat{\theta_2}) = \Sigma_{11} + \Sigma_{22} - 2\Sigma_{12}^2\]. 
 
-The statistic $t_U = U / \sqrt(V)$ will follow a $t-distribution$ with $100-3$ degrees of freedom. Finally, the $p$-value for this two-sided test will be given by $p_U = t_{97}(|t_U|).
+The statistic $t_U = U / \sqrt(Var(U))$ follows a $t-distribution$ with $100-3$ degrees of freedom. We calculate
+the $p$-value of the statistic.
 
 ```{r, include=TRUE, echo=TRUE, out.lines=1:13}
 U = coef(nmodel)[1] - coef(nmodel)[2]
 t = U / sqrt((cov.est[1,1] + cov.est[2,2] - 2 * cov.est[1,2]^2))
 pval = pt(abs(t), df = 97, lower.tail = FALSE)
 ```
-Given that $p_U$ turned out to be smaller than $\alpha = 0.05$, we have sufficient evidence to reject $H_0$ for this confidence level.
+Given that the $p$-value $= `r pval`$ is smaller than $\alpha = 0.05$, we have sufficient evidence to reject $H_0$ for this confidence level.
 
 ## Question 4
 ### a) 
