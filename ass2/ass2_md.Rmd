@@ -107,6 +107,69 @@ If $V > F_{q - p, n - q,1 - \alpha}$ then we reject $H_0$ that the linear submod
 ## Question 3
 ### a)
 
+```{r, include=FALSE, echo=TRUE, out.lines=1:13}
+N = 100
+x = runif(N,0,4)
+theta = c(2, 3, 1)
+sigma = 0.5 #sigma_sq = 0.25
+eps = rnorm(N, 0, sigma)
+f <- function(x) {return(theta[1] * x + theta[2] / (theta[3] + 3*x^2))} 
+y = x # simulated observations
+ftrue = x # true values
+for (i in 1:N) {
+  y[i] = f(x[i]) + eps[i]
+  ftrue[i] = f(x[i])
+  }
+form=as.formula(y ~ theta1*x + theta2/(theta3+3*x^2))
+dfy = data.frame(y)
+dfy['x'] = x
+```
+
+In this question, we need to artificcially generate our data. We will take $x_i \in [0,4]$ with $i = 1, \dots ,100$ and our function $f(x,  \bm{\theta}) = \theta_1 x + \theta_2 / (\theta_3 + 3 x^2). To our simulated response we have added an error term $\epsilon_i \sim N(0, \sigma^2)$ such that $y_i = f(x_i) + e_i$. Here, we chose $\bm{\theta} = (2, 3, 1)$ and $\sigma = 0.5$. The following plot illustrates the dataset.
+
+
+```{r, include=TRUE, echo=TRUE, out.lines=1:13}
+plot(x,y,
+     xlab="Values for x",
+     ylab="Values for y",
+     main='Plotting simulated values agains true values') # plot of dataset
+```
+
+Now, we estimate the parameter $\bm{\theta}$ by means of a non-linear model. The model's summary will give us our first insights about the quality of our estimation.
+
+```{r, include=TRUE, echo=TRUE, out.lines=1:13}
+nmodel=nls(form,data=dfy,start=c(theta1=theta[1],theta2=theta[2],theta3=theta[3])) 
+hat.th=coef(nmodel); hat.th ## the LSE estimates of theta's
+summary(nmodel) # more informative output
+```
+Indeed, we can observe that our estimates seem to be quite accurate, but not to the same extent for the three dimensions of $\bm{\theta}$, yet the estimation for $\theta_2$ seems to be slightly more off with respect to the other two dimesions of $\bm{\theta}$.
+
+If we see our estimate for the error's variance, we will see that it does give a relatively good estimation (although that obviously depends on the context of the data:
+
+```{r, include=FALSE, echo=TRUE, out.lines=1:13}
+RSS=deviance(nmodel);RSS # the same info in nmodel
+y_var=RSS/(N-2) 
+y_var
+```
+Similarly, here we have our covariance matrix using our estimates:
+```{r, include=FALSE, echo=TRUE, out.lines=1:13}
+cov.est=vcov(nmodel)
+cov.est
+```
+
+Finally, we can feet our estimate function, i.e. $f(x, \bm{\hat{\theta}}$, in the plot.
+
+```{r, include=FALSE, echo=TRUE, out.lines=1:13}
+f=function(x,theta)return(theta[1] * x + theta[2] / (theta[3] + 3*x^2))
+coef(nmodel) # estimates for theta
+x=seq(from=0,to=4,length.out=N)
+lines(x,f(x,coef(nmodel)),col="red")  # fitted curve
+```
+
+# the estimated covariance matrix for hat.theta
+cov.est=vcov(nmodel)
+cov.est
+
 ## Question 4
 ### a) 
 
