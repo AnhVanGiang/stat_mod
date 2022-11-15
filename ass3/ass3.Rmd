@@ -1,0 +1,138 @@
+---
+title: "ass3"
+output:
+  pdf_document:
+    includes:
+      in_header: preample.tex
+date: "`r Sys.Date()`"
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+library(afex)
+library(performance)
+library(magrittr)
+library(MASS)
+library(ggplot2)
+library(plyr)
+library(EnvStats)
+hook_output <- knit_hooks$get('output')
+knit_hooks$set(output = function(x, options) {
+  if (!is.null(n <- options$out.lines)) {
+    n <- as.numeric(n)
+    x <- unlist(stringr::str_split(x, "\n"))
+    nx <- length(x) 
+    x <- x[pmin(n,nx)]
+    if(min(n) > 1)  
+      x <- c(paste(options$comment, "[...]"), x)
+    if(max(n) < nx) 
+      x <- c(x, paste(options$comment, "[...]"))
+    x <- paste(c(x, "\n"), collapse = "\n")
+  }
+  hook_output(x, options)
+    })
+```
+
+## Question 1
+### a) 
+We have 
+
+\begin{align*}
+ \log{f(y; r, \lambda_i)} &= \log{y^{r - 1}} + \log{e^{-y/\lambda_i}} - \log{\lambda_{i}^r} - \log{\Gamma(x)}\\
+&= (r - 1) \log{y} - \frac{y}{\lambda_i} - r\log{\lambda_i} - \log{\Gamma(x)}\\
+&= (r - 1) \log{y} - y r \theta_i - r\log{\lambda_i}- \log{\Gamma(x)}\\
+&= (r - 1) \log{y} - y r \theta_i + r\log(r \theta_i) - \log{\Gamma(x)} \\
+&= (r - 1) \log{y} - y r \theta_i + r \log(r) + r\log(\theta_i)- \log{\Gamma(x)}\\
+&= \frac{y \theta_i - (-\log{\theta_i})}{1/r} + \left( r\log{r} + (r-1)\log{y} - \log{\Gamma(r)} \right).
+\end{align*}
+Thus, it follows that $f(y;r,\lambda_i)$ belongs to the exponential family with 
+$b(\theta_i) = -\log{\theta_i}$, $\phi/A_i = 1/r$ with $\phi = 1/r$ and $A_i = 1$.  
+
+### b) 
+We have 
+\[ b(\theta_i) = -\log{\theta_i} \]
+so $\ex{Y_i} = b^{\prime}(\theta_i) = \frac{-1}{\theta_i} =-r\lambda_i = \mu_i$. Similarly, 
+\[ \text{Var}(Y_i) = b^{\prime\prime}(\theta_i) \phi/A_i = \frac{1}{\theta_i^2 r} = r\lambda_i^2.\]
+Furthermore, the CLF $g(\mu_i) = (b^{\prime})^{-1}(u) = \frac{-1}{\mu_i}.$
+
+### c) 
+We have 
+\begin{align*}
+P &= \phi \sum_{i=1}^n \frac{(Y_i - \ex_{\hat{\beta}}Y_i)^2}{\text{Var}_{\hat{\beta}}(Y_i)}\\
+&= \frac{1}{r}\sum_{i=1}^n \frac{(Y_i \hat{\theta}_i)^2 + 2Y_i \hat{\theta}_i + 1}{1/(\hat{\theta}_i r)}\\
+&= \sum_{i=1}^n Y_i^2 \hat{\theta}_i^3 + 2\sum_{i=1}^n Y_i \hat{\theta}_i^2 + n.
+\end{align*}
+Furthermore, $\tilde{\theta}_i = (b^{\prime})^{-1}(Y_i) = -1/Y_i$ then 
+\begin{align*}
+D &= 2 \sum_{i=1}^n A_i (Y_i (\tilde{\theta}_i - \hat{\theta}_i) - b(\tilde{\theta}_i) + b(\hat{\theta}_i))\\
+&= 2 \sum_{i=1}^n (Y_i \left(\frac{-1}{Y_i} - \hat{\theta}_i \right) - \log{Y_i} - \log{\hat{\theta}_i})\\
+&= 2 \sum_{i=1}^n (-1 -Y_i \hat{\theta}_i - \log{Y_i} - \log{\hat{\theta}_i}).
+\end{align*}
+Finally, for the working matrix $\hat{W}$, 
+\begin{align*}
+\hat{w}_{ii} &= \frac{A_i}{[g^{\prime}(\mu_i)]^2 b^{\prime \prime}(\theta_i)}\\
+&= \frac{1}{\frac{1}{\hat{\mu}_i^4} \frac{1}{\hat{\theta}^2}}\\
+&= \frac{1}{\hat{\theta}_i^4 \frac{1}{\hat{\theta}^2}}\\
+&= \frac{1}{\hat{\theta}_i^2}. 
+\end{align*}
+
+## Question 2
+### a) 
+```{r, echo=FALSE, include=FALSE}
+n = 18;
+p = 2;
+
+crit_val = qt(0.05/2, n-p-1, lower.tail = FALSE);
+```
+There are 18 observations. The estimated parameters $\hat{\beta }= (\hat{\beta}_0, \hat{\beta}_1, \hat{\beta}_2) = (-0.021, 0.017, 0.01)$. Similarly, $\tilde{\phi} = \frac{D_{\Omega}}{n - p - 1} = \frac{0.3}{18 - 2 - 1} = 0.02$. 
+To test for $H_0: \beta_1 = 0$ against $H_1: \beta_1 \neq 0$, we compute 
+$t_1 = \frac{\hat{\beta}_1}{\sqrt{\left(\hat{I}_F^{-1}\right)_{11}}} = \frac{0.017}{0.001} = 17$ where \
+$\left(\hat{I}_F^{-1}\right)_{11}$ is the square of the standard error of the first variable. 
+Since the test statistic $t_1 = 17$ is larger than $t_{15;1-0.05/2} = 2.13$, we reject $H_0$. 
+The $96\%$ confidence interval for $\beta_1$ is 
+\[ \hat{\beta}_1 \pm t_{15;1-0.04/2} \sqrt{\left(\hat{I}_F^{-1}\right)_{11}} = 0.017 \pm 2.25 \times 0.01 = [-0.0055, 0.0395].   \]
+
+
+### b) 
+To investigate the relevance of the variables $X1$ and $X2$, it suffices to look 
+at the corresponding $p$-values in the output table of the command $summary(model)$. 
+This shows that the $p$-value of $X2$ is smaller than $0.05$ so we can not dismiss the 
+relevance of $X2$. Similarly, we test for the relevance of $X1$ in a) and rejected the 
+null hypothesis that $\beta_1 = 0$ so $X1$ is relevant. 
+
+### c) 
+If not given, the standard errors in the first table could have been recovered as 
+the square root of the variance of the sample. If the estimates are given, then the 
+$t$-values could be (approximately) recovered by the formula 
+\[t_i = \frac{\hat{\beta}_i}{\sqrt{\left(\hat{I}_F^{-1}\right)_{ii}}} \]
+where $\sqrt{\left(\hat{I}_F^{-1}\right)_{11}}$ is the standard error of the $i$ 
+predictor. It follows that the $p$-values could be recovered from the test statistic and the degree
+of freedom. Similarly, if the $t$-values are given, the estimates could be recovered. 
+
+For the second table, the degree of freedom can be recovered from the number of observations
+and the number of predictors. If the residuals deviance are given then we could 
+calculate the deviances and the $p$-values since the test statistic will also be known. 
+On the other hand, we are given the residual deviances for the variables but not the NULL one, 
+then we could not calculate the deviance of the first variable since it depends on the 
+residual deviance of the NULL one. Furthermore, if the deviances are known then we
+could not compute the residual one because the system of equation will be underdetermined.
+Also, by the result of Exercise 1, the residual deviance D of the models can be 
+determined by the responses $Y_i$ and the fitted canonical parameters $\hat{\theta}_i$ but 
+since $\hat{\theta}_i = x_i^{T} \hat{\beta}$, we could recover $\hat{\theta}_i$
+and therefore, the deviances of the models. And if the deviances are known, everything 
+in the second table can be recovered. 
+
+### d)
+We use that option because the dispersion parameter $\phi$ is not known beforehand
+since the family is Poisson which does not have the dispersion parameter.
+It is not possible to derive what we would have obtained if we used the Chi-square test option
+because the Chisquare test assumes that $\phi$ is known and the test statistics use 
+$\phi$ instead of the estimated one in the $F$ test. 
+
+### e) 
+
+
+
+
+
+

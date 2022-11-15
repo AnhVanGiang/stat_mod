@@ -58,7 +58,7 @@ The $95\%$ confidence interval is
 \[ f(0, \hat{\theta}) \pm t_{97,0.975} \times \sqrt{\hat{v}_x^{T} \hat{\Sigma} \hat{v}} = [-1.14, 2.22]. \]
 
 ### e) 
-Since the dataset with the funtion $f(x, \theta)$, we can compute the matrix $\hat{V}$ where
+Since we have the dataset with the funtion $f(x, \theta)$, we can compute the matrix $\hat{V}$ where
 \[ \hat{V}_{ij}  = \partial f(x_i, \hat{\theta})/\partial \theta_j. \]
 Thus, we can compute $(\hat{V}^{T} \hat{V})^{-1}$ and 
 \[ \hat{\sigma}^2 = \hat{\Sigma}(\hat{V}^{T} \hat{V})  \]
