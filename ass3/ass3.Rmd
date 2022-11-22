@@ -94,7 +94,7 @@ crit_val = qt(0.05/2, n-p-1, lower.tail = FALSE);
 ```
 There are 18 observations. The estimated parameters $\hat{\beta }= (\hat{\beta}_0, \hat{\beta}_1, \hat{\beta}_2) = (-0.021, 0.017, 0.01)$. Similarly, $\tilde{\phi} = \frac{D_{\Omega}}{n - p - 1} = \frac{0.3}{18 - 2 - 1} = 0.02$. 
 To test for $H_0: \beta_1 = 0$ against $H_1: \beta_1 \neq 0$, we compute 
-$t_1 = \frac{\hat{\beta}_1}{\sqrt{\left(\hat{I}_F^{-1}\right)_{11}}} = \frac{0.017}{0.001} = 17$ where \
+$t_1 = \frac{\hat{\beta}_1}{\sqrt{\left(\hat{I}_F^{-1}\right)_{11}}} = \frac{0.017}{0.001} = 17$ where
 $\left(\hat{I}_F^{-1}\right)_{11}$ is the square of the standard error of the first variable. 
 Since the test statistic $t_1 = 17$ is larger than $t_{15;1-0.05/2} = 2.13$, we reject $H_0$. 
 The $96\%$ confidence interval for $\beta_1$ is 
