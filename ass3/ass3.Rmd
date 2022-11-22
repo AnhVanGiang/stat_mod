@@ -135,9 +135,14 @@ We use that option because the dispersion parameter $\phi$ is not known beforeha
 It is not possible to derive what we would have obtained if we used the Chi-square test option
 because the Chisquare test assumes that $\phi$ is known and the test statistics use 
 $\phi$ instead of the estimated one in the $F$ test. 
-
 ### e) 
-
+Since we have the dispersion parameter $\hat{\phi}$, the Pearson statistic $P$ can be 
+derived as 
+\[ P = \hat{\phi} (n - p - 1) = 0.001958 * (18 - 2 - 1) = 0.0029. \]
+It is not possible to derive $\hat{W}$ because as we have shown in exercise 1,
+the element $\hat{w}_{ij}$ of the working matrix $\hat{W}$ depends on the estimated
+$\hat{\theta}_i$ which in turn depends on the input $x_i$. Since we do not know $x_i$ 
+(not given in the question), we can not derive $\hat{w}_{ij}$. 
 
 
 
