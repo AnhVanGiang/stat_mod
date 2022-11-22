@@ -41,25 +41,29 @@ We have
  \log{f(y; r, \lambda_i)} &= \log{y^{r - 1}} + \log{e^{-y/\lambda_i}} - \log{\lambda_{i}^r} - \log{\Gamma(x)}\\
 &= (r - 1) \log{y} - \frac{y}{\lambda_i} - r\log{\lambda_i} - \log{\Gamma(x)}\\
 &= (r - 1) \log{y} - y r \theta_i - r\log{\lambda_i}- \log{\Gamma(x)}\\
+&= (r - 1) \log{y} - y r \theta_i - r\log{((r \theta_i)^{-1})} - \log{\Gamma(x)}\\
 &= (r - 1) \log{y} - y r \theta_i + r\log(r \theta_i) - \log{\Gamma(x)} \\
 &= (r - 1) \log{y} - y r \theta_i + r \log(r) + r\log(\theta_i)- \log{\Gamma(x)}\\
-&= \frac{y \theta_i - (-\log{\theta_i})}{1/r} + \left( r\log{r} + (r-1)\log{y} - \log{\Gamma(r)} \right).
+&= -yr \theta_i + r \log{\theta_i} + r \log(r) + (r - 1) \log{y} - \log{\Gamma(x)}\\
+&= -r (y \theta_i - \log{\theta_i}) + r \log(r) + (r - 1) \log{y} - \log{\Gamma(x)}\\
+&= \frac{y \theta_i - \log{\theta_i}}{-1/r} + r \log(r) + (r - 1) \log{y} - \log{\Gamma(x)}\\
+&= \frac{y \theta_i - \log{\theta_i}}{-1/r} + \left( r\log{r} + (r-1)\log{y} - \log{\Gamma(r)} \right).
 \end{align*}
 Thus, it follows that $f(y;r,\lambda_i)$ belongs to the exponential family with 
-$b(\theta_i) = -\log{\theta_i}$, $\phi/A_i = 1/r$ with $\phi = 1/r$ and $A_i = 1$.  
+$b(\theta_i) = \log{\theta_i}$, $\phi/A_i = -1/r$ with $\phi = 1/r$ and $A_i = 1$.  
 
 ### b) 
 We have 
-\[ b(\theta_i) = -\log{\theta_i} \]
-so $\ex{Y_i} = b^{\prime}(\theta_i) = \frac{-1}{\theta_i} =-r\lambda_i = \mu_i$. Similarly, 
-\[ \text{Var}(Y_i) = b^{\prime\prime}(\theta_i) \phi/A_i = \frac{1}{\theta_i^2 r} = r\lambda_i^2.\]
+\[ b(\theta_i) = \log{\theta_i} \]
+so $\ex{Y_i} = b^{\prime}(\theta_i) = \frac{1}{\theta_i} =r\lambda_i = \mu_i$. Similarly, 
+\[ \text{Var}(Y_i) = b^{\prime\prime}(\theta_i) \phi/A_i = \frac{-1}{\theta_i^2} \frac{-1}{r} = \frac{1}{\theta_i^2 r} = \frac{r^2 \lambda_i^2}{r} = r\lambda_i^2.\]
 Furthermore, the CLF $g(\mu_i) = (b^{\prime})^{-1}(u) = \frac{-1}{\mu_i}.$
 
 ### c) 
-We have 
+We have the Pearson's statistic 
 \begin{align*}
 P &= \phi \sum_{i=1}^n \frac{(Y_i - \ex_{\hat{\beta}}Y_i)^2}{\text{Var}_{\hat{\beta}}(Y_i)}\\
-&= \frac{1}{r}\sum_{i=1}^n \frac{(Y_i \hat{\theta}_i)^2 + 2Y_i \hat{\theta}_i + 1}{1/(\hat{\theta}_i r)}\\
+&= \frac{1}{r}\sum_{i=1}^n \frac{(Y_i \hat{\theta}_i)^2 + 2Y_i \hat{\theta}_i + 1}{1/(\hat{\theta}_i^2 r)}\\
 &= \sum_{i=1}^n Y_i^2 \hat{\theta}_i^3 + 2\sum_{i=1}^n Y_i \hat{\theta}_i^2 + n.
 \end{align*}
 Furthermore, $\tilde{\theta}_i = (b^{\prime})^{-1}(Y_i) = -1/Y_i$ then 
