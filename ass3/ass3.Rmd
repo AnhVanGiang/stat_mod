@@ -150,7 +150,7 @@ $\hat{\theta}_i$ which in turn depends on the input $x_i$. Since we do not know 
 
 ### a)
 
-```{r, echo=TRUE, include=FALSE}
+```{r, echo=TRUE, include=TRUE}
 data3=read.table("psi.txt",header=TRUE)
 attach(data3)
 ```
@@ -171,48 +171,45 @@ rownames(table_data) = c('Failed','Passed')
 table=as.table(table_data)
 table
 ```
-The table below shows the mean of the students for each of the combinations of the binary variables 'passed' and 'psi'. The only significative difference is that the mean of the students that passed and did not have PSI is higher than the average grade of the students that passed and did have PSI. However, this could be due to the fact that only $3$ students passed. Probably, only the outstanding students managed.
+The table below shows the mean of the students for each of the combinations of the binary variables 'passed' and 'psi'. The only significant difference is that the mean of the students that passed and did not have PSI is higher than the average grade of the students that passed and did have PSI. However, this could be due to the fact that only $3$ students passed. Probably, only the outstanding students managed.
 
-```{r, echo=TRUE, include=FALSE}
-m00 = mean(data3$gpa[data3$passed == 0 & data3$psi == 0])
-m01 = mean(data3$gpa[data3$passed == 0 & data3$psi == 1])
-m10 = mean(data3$gpa[data3$passed == 1 & data3$psi == 0])
-m11 = mean(data3$gpa[data3$passed == 1 & data3$psi == 1])
+```{r, echo=TRUE, include=TRUE}
+m00 = mean(data3$gpa[data3$passed == 0 & data3$psi == 0]);
+m01 = mean(data3$gpa[data3$passed == 0 & data3$psi == 1]);
+m10 = mean(data3$gpa[data3$passed == 1 & data3$psi == 0]);
+m11 = mean(data3$gpa[data3$passed == 1 & data3$psi == 1]);
 
-table_data2 = matrix(c(m00,m01,m10,m11), ncol=2, byrow=TRUE)
-colnames(table_data2) = c('No PSI','PSI')
-rownames(table_data2) = c('Failed','Passed')
-table2=as.table(table_data2)
+table_data2 = matrix(c(m00,m01,m10,m11), ncol=2, byrow=TRUE);
+colnames(table_data2) = c('No PSI','PSI');
+rownames(table_data2) = c('Failed','Passed');
+table2=as.table(table_data2);
 table2
 ```
 The following will give us more insight about the data. Note how the students that did have PSI have a higher average and also more variance. The plot suggests a better overall performance of the students with PSI.
 
-``{r, echo=TRUE, include=FALSE}
+```{r, echo=TRUE, include=TRUE}
 boxplot(gpa~psi,data=data3,names=c("Without PSI","With PSI"), main='Box-plot of the average grade') 
 ```
 Now, we can try different models and compare how they fit, after converting the variable 'psi' into a factor:
 
-``{r, echo=TRUE, include=FALSE}
+```{r, echo=TRUE, include=TRUE}
 data3$psi = as.factor(data3$psi)
 
 model3_1=glm(passed~psi*gpa,data=data3,family=binomial)
-anova(model3, test = 'Chisq')
+anova(model3_1, test = 'Chisq')
 model3_2=glm(passed~psi+gpa,data=data3,family=binomial)
-anova(model3, test = 'Chisq')
-model3_3=glm(passed~psi:gpa,data=data3,family=binomial)
-anova(model3, test = 'Chisq')
+anova(model3_2, test = 'Chisq')
 ```
 The first of them does not seem to be a trustful one, for the it has a non significant $p$-value for the interaction term of the variables 'psi' and 'passed'. We drop that term for the second model and see that both of them are significant. Thus, that would be a good model. However, if we only consider the interaction term, as we do in the third of the models, we achieve greater levels of significance, for the $p$-value is several orders of magnitude smaller than the $p$-values achieved by the second model. To have a second 'opinion', we can also check their summaries:
 
-``{r, echo=TRUE, include=FALSE}
+```{r, echo=TRUE, include=TRUE}
 summary(model3_1)
 summary(model3_2)
-summary(model3_3)
 ```
 Note that the $p$-values from the first model are much worse –i.e. larger– than the ones for the second model and, similarly, the ones for the second model are larger than the $p$-values for the third model. Before making a decision, we can also check the AIC of the three models:
 
-``{r, echo=TRUE, include=FALSE}
-AIC(model3_1, model3_2, model3_3)
+```{r, echo=TRUE, include=TRUE}
+AIC(model3_1, model3_2)
 ```
 Again, the AIC confirms our thoughts: the best model seems to be the third one. So from now on, we will stick to that model. 
 
