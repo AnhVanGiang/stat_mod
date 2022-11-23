@@ -215,6 +215,108 @@ Again, the AIC confirms our thoughts: the best model seems to be the third one. 
 
 Seeing the results of the model, which are significant enough, 
 
+### b)
+
+# b)
+
+```{r, echo=TRUE, include=TRUE}
+student1 = data.frame(psi=as.factor(1), gpa= 3)
+student0 = data.frame(psi=as.factor(0), gpa= 3)
+predict(model3_3, student1, type="response", se.fit=TRUE)$fit
+predict(model3_3, student0, type="response", se.fit=TRUE)$fit
+```
+### c)
+
+# c)
+
+V, I have no clue about what's going on in this one. Somehow I would expect exp(coeff2) / exp(coeff3) to be larger than 1
+
+```{r, echo=TRUE, include=TRUE}
+exp(coef(model3_3))
+exp(coef(model3_3))[3] / exp(coef(model3_3))[2]
+exp(coef(model3_3))[2] / exp(coef(model3_3))[3]
+```
+
+
+
+
+## Question 4
+
+
+```{r, echo=TRUE, include=FALSE}
+data=read.table("awards.txt",header=TRUE)
+attach(data)
+```
+### a)
+
+```{r, echo=TRUE, include=TRUE}
+# Poisson regression excluding math
+plot(prog,num_awards)
+plot(prog,num_awards="Dataset",
+     xlab="prog",ylab="awards")
+
+```
+
+```{r, echo=TRUE, include=TRUE}
+data$prog = as.factor(data$prog)
+model=glm(num_awards~prog,data=data,family=poisson)
+summary(model)
+```
+
+```{r, echo=TRUE, include=TRUE}
+model=glm(num_awards~prog*math,data=data,family=poisson)
+anova(model, test = 'Chisq')
+
+drop1(model)
+anova(model, test = 'Chisq')
+
+model=glm(num_awards~prog+math,data=data,family=poisson)
+anova(model, test = 'Chisq')
+
+model=glm(num_awards~progs+math,data=data,family=poisson)
+summary(model)
+```
+
+```{r, echo=TRUE, include=TRUE}
+FisherInv=vcov(model);FisherInv #or FisherInv=summary(model2)$cov.scaled
+
+ci1 = coef(model)[1]+c(-1,1)*qt(0.975,model$df.resid)*sqrt(FisherInv[1,1])
+ci2 = coef(model)[2]+c(-1,1)*qt(0.975,model$df.resid)*sqrt(FisherInv[2,2])
+ci3 = coef(model)[3]+c(-1,1)*qt(0.975,model$df.resid)*sqrt(FisherInv[3,3])
+ci4 = coef(model)[4]+c(-1,1)*qt(0.975,model$df.resid)*sqrt(FisherInv[4,4])
+
+ci1
+ci2
+ci3
+ci4
+```
+
+### c)
+
+```{r, echo=TRUE, include=TRUE}
+data['fitted'] = fitted(model)
+mean(data['fitted'][data['prog']==1])
+mean(data['fitted'][data['prog']==2])
+mean(data['fitted'][data['prog']==3])
+student = data.frame(prog=as.factor(1), math= 55)
+predict(model, student, type="response", se.fit=TRUE)$fit
+```
+
+### d)
+```{r, echo=TRUE, include=TRUE}
+P=sum(residuals(model,type="pearson")^2); P
+D=sum(residuals(model,type="deviance")^2); D
+
+phi=P/model$df.resid; phi
+summary(model)$dispersion
+D/df.residual(model)
+```
+
+### e)
+
+```{r, echo=TRUE, include=TRUE}
+D1=deviance(model);D1;D1/df.residual(model) 
+```
 
 
 
