@@ -211,7 +211,6 @@ Note that the $p$-values from the first model are much worse –i.e. larger– t
 ```{r, echo=TRUE, include=TRUE}
 AIC(model3_1, model3_2)
 ```
-Again, the AIC confirms our thoughts: the best model seems to be the third one. So from now on, we will stick to that model. 
 
 Seeing the results of the model, which are significant enough, 
 
@@ -249,33 +248,39 @@ attach(data)
 ```
 ### a)
 
+From the plot below, it is of course not clear that the type of program a student follows has an effect on the amount of awards he or she can get. Therefore, we will have to perform some tests.
+
 ```{r, echo=TRUE, include=TRUE}
 # Poisson regression excluding math
 plot(prog,num_awards)
 plot(prog,num_awards="Dataset",
      xlab="prog",ylab="awards")
-
 ```
+We decide to convert the variable program into a factor. Afterwards we perform a test without taking the. variable 'math' into account. The results for the ANOVA –with the Chi Squared test– yield a significant $p$-value for the factor 'prog'. Afterwards, we can look at the summary of the model: it says that programs $1$ and $2$ are significant enough, whereas program number $3$ does not appear to have such a relevant effect. Moreover, looking at the absolute value. of the coefficients, we can rank their relevance, from high to low, in the following order: $2$, $1$ and $3$.
 
 ```{r, echo=TRUE, include=TRUE}
 data$prog = as.factor(data$prog)
 model=glm(num_awards~prog,data=data,family=poisson)
+anova(model, test='Chisq')
 summary(model)
 ```
+### b)
+
+Now we are taking into account the variable 'math' for our model. When performing the first test, we notice that the interaction term between the factor 'prog' and the variable 'math' does not turn out to be relevant. Checking the AIC values for the models we. note that indeed the model that excludes interaction term seems to work better. Therefore, we decide to drop that term
 
 ```{r, echo=TRUE, include=TRUE}
 model=glm(num_awards~prog*math,data=data,family=poisson)
 anova(model, test = 'Chisq')
-
 drop1(model)
-anova(model, test = 'Chisq')
+```
+Now we need to check the significance of our new model: looking at the ANOVA table, all terms turn out to be significant. The same thing happens when looking at the $p$-values of the Summary table.
 
+```{r, echo=TRUE, include=TRUE}
 model=glm(num_awards~prog+math,data=data,family=poisson)
 anova(model, test = 'Chisq')
-
-model=glm(num_awards~progs+math,data=data,family=poisson)
 summary(model)
 ```
+To compute $95\%$-confidence intervals, we first need to obtain the Covariance matrix to compute our confidence intervals. By default, this is done. in R by taking the Normal quantiles. However, we opt to be more conservative and not make any extra assumptions by computing it with. $t$-quantiles. The. resulting interval for each of the coefficients of the model is provided below.
 
 ```{r, echo=TRUE, include=TRUE}
 FisherInv=vcov(model);FisherInv #or FisherInv=summary(model2)$cov.scaled
@@ -293,16 +298,26 @@ ci4
 
 ### c)
 
+To infer what's the best program choice for a student that is only interested in the awards, we can add a column containing the fitted values of the model to our original data. Afterwards, we can filter the rows by program and compute the average expected amount of awards. By doing that, we reinforce our. hypothesis of program $2$. being the best one, followed. by progran $1$ and program $3$.
+
 ```{r, echo=TRUE, include=TRUE}
 data['fitted'] = fitted(model)
 mean(data['fitted'][data['prog']==1])
 mean(data['fitted'][data['prog']==2])
 mean(data['fitted'][data['prog']==3])
+```
+The following lines show the expected number of awards a student enroled program $1$ and with a grade of $55$ in mathematics:
+
+```{r, echo=TRUE, include=TRUE}
 student = data.frame(prog=as.factor(1), math= 55)
 predict(model, student, type="response", se.fit=TRUE)$fit
 ```
 
+
 ### d)
+
+Below, we see the values for the Pearson's Chi Squared statistic $P$ and deviance $D$. A priori, we can say they are not very off. To be more. rigourous, however, we can compute for $\phi = P / (n-p-1)$, which should be below $1$ and. not very off from $1$. Similarly, the obtained deviance $D$ divided by the deegrees of freedom of the residual gives a value that is very close to $1$.  
+
 ```{r, echo=TRUE, include=TRUE}
 P=sum(residuals(model,type="pearson")^2); P
 D=sum(residuals(model,type="deviance")^2); D
@@ -313,6 +328,8 @@ D/df.residual(model)
 ```
 
 ### e)
+
+Here, we can check for overdispersion. Note that our $\phi$ is below $1$, which is a indicates that we probably do not have overdispersion. In addition, the deviance $D$ is very close to $1$, which is coherent with the hypothesis of not having overdispersion.
 
 ```{r, echo=TRUE, include=TRUE}
 D1=deviance(model);D1;D1/df.residual(model) 
