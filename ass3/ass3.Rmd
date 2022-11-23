@@ -246,7 +246,7 @@ plot(prog,num_awards)
 plot(prog,num_awards="Dataset",
      xlab="prog",ylab="awards")
 ```
-We decide to convert the variable program into a factor. Afterwards we perform a test without taking the. variable 'math' into account. The results for the ANOVA –with the Chi Squared test– yield a significant $p$-value for the factor 'prog'. Afterwards, we can look at the summary of the model: it says that programs $1$ and $2$ are significant enough, whereas program number $3$ does not appear to have such a relevant effect. Moreover, looking at the absolute value. of the coefficients, we can rank their relevance, from high to low, in the following order: $2$, $1$ and $3$.
+We decide to convert the variable program into a factor. Afterwards we perform a test without taking the variable 'math' into account. The results for the ANOVA –with the Chi Squared test– yield a significant $p$-value for the factor 'prog'. Afterwards, we can take a look at the summary of the model: it says that programs $1$ and $2$ are significant enough, whereas program number $3$ does not appear to have such a relevant effect. Moreover, looking at the absolute value. of the coefficients, we can rank their relevance, from high to low, in the following order: program $2$, $1$ and $3$.
 
 ```{r, echo=TRUE, include=TRUE}
 data$prog = as.factor(data$prog)
@@ -256,14 +256,14 @@ summary(model)
 ```
 ### b)
 
-Now we are taking into account the variable 'math' for our model. When performing the first test, we notice that the interaction term between the factor 'prog' and the variable 'math' does not turn out to be relevant. Checking the AIC values for the models we. note that indeed the model that excludes interaction term seems to work better. Therefore, we decide to drop that term
+Now we are taking into account the variable 'math' in our model. When performing the first test, we notice that the interaction term between the factor 'prog' and the variable 'math' does not turn out to be relevant. Checking the AIC values for the models we note that indeed the model that excludes interaction term seems to work better, for it displays a lower value for the AIC. Therefore, we decide to drop that term.
 
 ```{r, echo=TRUE, include=TRUE}
 model=glm(num_awards~prog*math,data=data,family=poisson)
 anova(model, test = 'Chisq')
 drop1(model)
 ```
-Now we need to check the significance of our new model: looking at the ANOVA table, all terms turn out to be significant. The same thing happens when looking at the $p$-values of the Summary table.
+Now we need to check the significance of our new model: looking at the ANOVA table, all terms turn out to be significant enough. The same thing happens when looking at the $p$-values of the Summary table.
 
 ```{r, echo=TRUE, include=TRUE}
 model=glm(num_awards~prog+math,data=data,family=poisson)
@@ -279,16 +279,12 @@ ci1 = coef(model)[1]+c(-1,1)*qt(0.975,model$df.resid)*sqrt(FisherInv[1,1])
 ci2 = coef(model)[2]+c(-1,1)*qt(0.975,model$df.resid)*sqrt(FisherInv[2,2])
 ci3 = coef(model)[3]+c(-1,1)*qt(0.975,model$df.resid)*sqrt(FisherInv[3,3])
 ci4 = coef(model)[4]+c(-1,1)*qt(0.975,model$df.resid)*sqrt(FisherInv[4,4])
-
-ci1
-ci2
-ci3
-ci4
+ci1; ci2; ci3; ci4
 ```
 
 ### c)
 
-To infer what's the best program choice for a student that is only interested in the awards, we can add a column containing the fitted values of the model to our original data. Afterwards, we can filter the rows by program and compute the average expected amount of awards. By doing that, we reinforce our. hypothesis of program $2$. being the best one, followed. by progran $1$ and program $3$.
+To infer what's the best program choice for a student that is only interested in obtaining awards, we can add a column containing the fitted values of the model to our original data. Afterwards, we can filter the rows by program and compute the average expected amount of awards. By doing that, we reinforce our hypothesis of program $2$ being the best one, followed by progran $1$ and program $3$.
 
 ```{r, echo=TRUE, include=TRUE}
 data['fitted'] = fitted(model)
@@ -296,7 +292,7 @@ mean(data['fitted'][data['prog']==1])
 mean(data['fitted'][data['prog']==2])
 mean(data['fitted'][data['prog']==3])
 ```
-The following lines show the expected number of awards a student enroled program $1$ and with a grade of $55$ in mathematics:
+The following lines show the predicted number of awards a new student enroled program $1$ and with a grade of $55$ in mathematics:
 
 ```{r, echo=TRUE, include=TRUE}
 student = data.frame(prog=as.factor(1), math= 55)
@@ -306,7 +302,7 @@ predict(model, student, type="response", se.fit=TRUE)$fit
 
 ### d)
 
-Below, we see the values for the Pearson's Chi Squared statistic $P$ and deviance $D$. A priori, we can say they are not very off. To be more. rigourous, however, we can compute for $\phi = P / (n-p-1)$, which should be below $1$ and. not very off from $1$. Similarly, the obtained deviance $D$ divided by the deegrees of freedom of the residual gives a value that is very close to $1$.  
+Below, we see the values for the Pearson's Chi Squared statistic $P$ and deviance $D$. A priori, we can say they are not very off. To be more rigourous, however, we can compute for $\phi = P / (n-p-1)$, which should be below $1$ and not very far from $1$. Similarly, the obtained deviance $D$ divided by the deegrees of freedom of the residual gives a value that is very close to $1$.  
 
 ```{r, echo=TRUE, include=TRUE}
 P=sum(residuals(model,type="pearson")^2); P
