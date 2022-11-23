@@ -152,6 +152,7 @@ $\hat{\theta}_i$ which in turn depends on the input $x_i$. Since we do not know 
 
 ```{r, echo=TRUE, include=TRUE}
 data3=read.table("psi.txt",header=TRUE)
+data3$psi = as.factor(data3$psi)
 attach(data3)
 ```
 The following table gives us some insight about the dataset. Note that the students that have not been instructed with the PSI method are, a priori, more expected to fail. This observation is supported by the difference in the passing rate of both groups. However, we still need more information to draw any conclusions.
@@ -193,51 +194,40 @@ boxplot(gpa~psi,data=data3,names=c("Without PSI","With PSI"), main='Box-plot of 
 Now, we can try different models and compare how they fit, after converting the variable 'psi' into a factor:
 
 ```{r, echo=TRUE, include=TRUE}
-data3$psi = as.factor(data3$psi)
+model3=glm(passed~gpa + psi,data=data3,family=binomial)
+drop1(model3, test = 'Chisq')
 
-model3_1=glm(passed~psi*gpa,data=data3,family=binomial)
-anova(model3_1, test = 'Chisq')
-model3_2=glm(passed~psi+gpa,data=data3,family=binomial)
-anova(model3_2, test = 'Chisq')
+anova(glm(passed~psi * gpa,data=data3,family=binomial), test="Chisq")
 ```
-The first of them does not seem to be a trustful one, for the it has a non significant $p$-value for the interaction term of the variables 'psi' and 'passed'. We drop that term for the second model and see that both of them are significant. Thus, that would be a good model. However, if we only consider the interaction term, as we do in the third of the models, we achieve greater levels of significance, for the $p$-value is several orders of magnitude smaller than the $p$-values achieved by the second model. To have a second 'opinion', we can also check their summaries:
-
-```{r, echo=TRUE, include=TRUE}
-summary(model3_1)
-summary(model3_2)
-```
-Note that the $p$-values from the first model are much worse –i.e. larger– than the ones for the second model and, similarly, the ones for the second model are larger than the $p$-values for the third model. Before making a decision, we can also check the AIC of the three models:
-
-```{r, echo=TRUE, include=TRUE}
-AIC(model3_1, model3_2)
-```
-
-Seeing the results of the model, which are significant enough, 
+The default logistic model includes all the explanatory variables with their interaction terms. We 
+then check if either of these variables is significant or not, including the interaction term.
+Since the $p$-value of the interaction term is (> 0.05) non-significant,we can say that there is no interaction between the variables 'psi' and 'passed'. On the other hand, the $p$-values of both explanatory variables
+are smaller than $0.05$ which mean that we can not dismiss them. Thus, a good model would be one that contains both explanatory variables.
 
 ### b)
 
-# b)
-
 ```{r, echo=TRUE, include=TRUE}
-student1 = data.frame(psi=as.factor(1), gpa= 3)
-student0 = data.frame(psi=as.factor(0), gpa= 3)
-predict(model3_3, student1, type="response", se.fit=TRUE)$fit
-predict(model3_3, student0, type="response", se.fit=TRUE)$fit
+summary(model3)
 ```
+It can be seen that the estimated coefficients for the model are 
+$\hat{\beta} = (\hat{\beta}_0, \hat{\beta}_1, \hat{\beta}_2) = (-11.6, 2.34, 3.06)$. 
+It follows that the probability that a student with gpa equals to 3 who received psi
+passes the assignment is 
+\[ \frac{\exp{(-11.6 + 1\times2.34 + 3\times3.06)}}{1 + \exp{(-11.6 + 1\times2.34 + 3\times3.06)}} = 0.48.\]
+For the student who does not receive psi: 
+\[ \frac{\exp{(-11.6 + 0\times2.34 + 3\times3.06)}}{1 + \exp{(-11.6 + 0\times2.34 + 3\times3.06)}} = 0.08.\]
+Thus, it can be seen that having psi positively affect the passing probability, 
+which is evident from the positive coefficient of psi. 
 ### c)
-
-# c)
-
-V, I have no clue about what's going on in this one. Somehow I would expect exp(coeff2) / exp(coeff3) to be larger than 1
-
-```{r, echo=TRUE, include=TRUE}
-exp(coef(model3_3))
-exp(coef(model3_3))[3] / exp(coef(model3_3))[2]
-exp(coef(model3_3))[2] / exp(coef(model3_3))[3]
-```
-
-
-
+The odd is 
+\[ o = \frac{P(passes)}{P(fails)} = \exp{(-11.6 + 2.34 + gpa \times 3.06)}. \]
+This number means that the probability of passing is $o$ times as big as the probability 
+of failing. So the bigger the odd, the higher the probability of passing. 
+When $gpa$ increases in one unit, the odd is multiplied by $e^{3.06}$, 
+which is larger than 1 so this means that the higher the $gpa$, 
+the more likely the probability of passing. Thus, this number is dependent on $gpa$. 
+For an estimate of the odd, we calculate the mean of the $gpa$, which is $3.12$
+then the odd is $\exp{(-11.6 + 2.34 + 3.12 \times 3.06)}$
 
 ## Question 4
 
