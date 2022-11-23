@@ -323,7 +323,7 @@ to see if they are smaller than 1 or not.
 D/df.residual(model4_2);
 P/df.residual(model4_2);
 ```
-Since $\tilde{\phi} = 1.01 > 1$, we can say that there is an overdispersion problem. 
+Since $\tilde{\phi} = 1.01 > 1$, we could technically say that there is an overdispersion problem. However, the value for $\hat{\phi}$ is satisfactory and $\tilde{\phi} is sufficiently close to the desired value $1$ for us to disregard it. This indicates that we are unlikely to have an overdispersion problem in this scenario.
 
 
 
