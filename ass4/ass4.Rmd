@@ -1,0 +1,45 @@
+---
+title: "Assignment 4"
+output:
+  pdf_document:
+    includes:
+      in_header: preample.tex
+date: "`r Sys.Date()`"
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+library(afex)
+library(performance)
+library(magrittr)
+library(MASS)
+library(ggplot2)
+library(plyr)
+library(EnvStats)
+hook_output <- knit_hooks$get('output')
+knit_hooks$set(output = function(x, options) {
+  if (!is.null(n <- options$out.lines)) {
+    n <- as.numeric(n)
+    x <- unlist(stringr::str_split(x, "\n"))
+    nx <- length(x) 
+    x <- x[pmin(n,nx)]
+    if(min(n) > 1)  
+      x <- c(paste(options$comment, "[...]"), x)
+    if(max(n) < nx) 
+      x <- c(x, paste(options$comment, "[...]"))
+    x <- paste(c(x, "\n"), collapse = "\n")
+  }
+  hook_output(x, options)
+    })
+```
+
+### Question 1
+We have $\ex(X_t) = \ex(Y - 2Z_{t-1} + Z_t)$ and since $Y$ is independent of $\{Z_t\}$,
+it follows that 
+\[ \ex(X_t) = \ex(Y - 2Z_{t-1} + Z_t) = \ex(Y) - 2\ex(Z_{t-1} + \ex(Z_t)) = 1.\]
+Furthermore, 
+\[ \ex(X_t X_{t + h}) = \ex((Y - 2Z_{t-1} + Z_t) (Y - 2Z_{t + h - 1} + Z_{t+h}))
+= \ex(Y^2) = \text{Var}(Y) - \ex(Y)^2 = 0
+\]
+because in the expansion, any term with $Z_{t + k}$ will have 0 expectation. Thus, 
+$\{ X_t \}$ is stationary. 
