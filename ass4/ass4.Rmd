@@ -14,6 +14,7 @@ library(performance)
 library(magrittr)
 library(MASS)
 library(ggplot2)
+library(quantmod)
 library(plyr)
 library(EnvStats)
 hook_output <- knit_hooks$get('output')
@@ -34,6 +35,7 @@ knit_hooks$set(output = function(x, options) {
 ```
 
 ### Question 1
+#### a)
 We have $\ex(X_t) = \ex(Y - 2Z_{t-1} + Z_t)$ and since $Y$ is independent of $\{Z_t\}$,
 it follows that 
 \[ \ex(X_t) = \ex(Y - 2Z_{t-1} + Z_t) = \ex(Y) - 2\ex(Z_{t-1} + \ex(Z_t)) = 1.\]
@@ -42,4 +44,144 @@ Furthermore,
 = \ex(Y^2) = \text{Var}(Y) - \ex(Y)^2 = 0
 \]
 because in the expansion, any term with $Z_{t + k}$ will have 0 expectation. Thus, 
-$\{ X_t \}$ is stationary. 
+$\{ X_t \}$ is stationary. We can see that $\{ Y_t \}$ is not stationary because 
+$X_t$ depends on $t$ and thus, $\ex(Y_t)$ depends on $t$. 
+
+#### b) 
+We have $\nabla_d (W_t + 1) = W_t + 1 - W_{t-d} - 1 = W_t - W_{t-d}$ so it follows 
+that 
+\begin{align*}
+  \nabla_d^2 (W_t + 1) &= \nabla_d(W_t - W_{t-d})\\
+  &= W_t - W_{t - d} - W_{t-d} + W_{t-2d}\\
+  &= W_t - 2W_{t-d} + W_{t-2d}\\
+  &= at^2 + bts_t + X_t - 2(a(t-d)^2 +  b(t-d)s_t + X_{t-d}) + a(t-2d)^2 + b(t-2d)s_t + X_{t-2d}\\
+  &= a(t^2 - 2t^2 + 4dt - 2d^2 + t^2 - 4dt + 4d^2) + bs_t(t - 2t + 2d + t - 2d) + X_t - 2X_{t-d} + X_{t-2d}\\
+  &= ad^2 + bs_t 0 + X_t - 2X_{t-d} + X_{t-2d} = ad^2 + X_t - 2X_{t-d} + X_{t-2d}.
+\end{align*}
+If $\{X_t\}$ is stationary then $Y_t = ad^2 + (X_t - X_{t-d}) - (X_{t-d} - X_{t-2d})$ 
+is also stationary because $\{ (X_t - X_{t-d}) \}$ and $\{ (X_{t-d} - X_{t-2d}) \}$ 
+are stationary. 
+
+
+### Question 2
+#### a) 
+Note that $aY_{t-1} = 2aX_{t-1} - aX_{t-2}$ so 
+\begin{align*}
+aY_t &= 2aX_t - aX_{t-1}\\
+&= 2a(0.2X_{t-1} + Z_t - Z_{t-1}) - a(0.2X_{t-2} + Z_{t-1} - Z_{t-2})\\
+&= 0.4aX_{t-1} - 0.2aX_{t-2} - aZ_{t-1} +aZ_{t-2} + 2aZ_t\\
+&= \frac{1}{5} (2aX_{t-1} - aX_{t-2}) - aZ_{t-1} +aZ_{t-2} + 2aZ_t\\
+&= \frac{1}{5} aY_{t-1} - aZ_{t-1} +aZ_{t-2} + 2aZ_t.
+\end{align*}
+Let $a = 1/2$, we have 
+\[ aY_t = \frac{1}{5} aY_{t-1} - aZ_{t-1} +aZ_{t-2} + Z_t \] 
+so $\{ aY_t \}$ follows an ARMA(p, q) model for $a = 1/2$, $\alpha_1 = 1/5$, $\beta_{1} = \beta_{2} = a$, $p = 1$, and $q = 2$. 
+
+#### b) 
+We have 
+\begin{align*}
+\text{Cov}(X_t, Z_t) &= \ex[(X_t - \ex(X_t))(Z_t - \ex(Z_t))]\\
+&=\ex[(X_t - \ex(X_t))Z_t]\\
+&= \ex(X_t Z_t) - \ex[Z_t \ex(X_t)]. 
+\end{align*}
+Assuming that $\{X_t\}$ is stationary, 
+\[ \text{Cov}(X_t, Z_t) = \ex(X_t Z_t) - \ex[Z_t \ex(X_t)] = \ex(X_t Z_t) - \ex(Z_t)\ex(X_t)\]
+so 
+
+
+
+### Question 3
+#### a) 
+The autocovariance function 
+\[ \gamma_Z(h) = \begin{cases} \sigma^2 \text{ for $h = 0$} \\ 0 \;\;\text{ for $h \neq 0$}     \end{cases}\]
+then the spectral density
+\[ f_Z(\lambda) = \frac{1}{2\pi} \sum_{h \in \mathbb{Z}} \gamma_Z(h) e^{-ih\lambda} 
+= \frac{1}{2\pi} \sigma^2. \]
+
+#### b) 
+$\{ X_t \}$ is an MA(q) time series by introducing new WN $Z^{'}_{t} = Z_{t + 1}$ 
+We have 
+\[ \ex(X_t) = \ex\left(\frac{1}{2} Z_{t+1} + Z_t - \frac{1}{2}Z_{t-1} \right) = \frac{1}{2} 
+\ex(Z_{t+1}) + \ex(Z_t) - \frac{1}{2} \ex(Z_{t-1}) = \sigma^2
+\]
+not dependent on $t$. Doing the same thing for $\ex(X_t X_{t+h})$ to see that the 
+expansion only contains $Z_t$ terms so it is also independent of $t$. Thus, $\{ X_t \}$
+is stationary.
+
+The autocovariance function 
+\[\gamma_{X}(h) = \begin{cases}\sigma^2\sum_{i=0}^{2 - h} \beta_i \beta_{i+h} & \text{ $h=0,1,\dots,2,$} \\
+\gamma_X(-h) & h = -1,\dots,-2,\\
+0, & \text{otherwise}
+\end{cases}\]
+and the spectral density 
+\begin{align*}
+f_X(\lambda) &= \frac{1}{2\pi} \sum_{h \in \mathbb{Z}} \gamma_X(h) e^{-ih\lambda}\\
+&=\frac{1}{2\pi} \sum_{h = -2}^{2} \gamma_X(h) e^{-ih\lambda}\\
+&= \frac{1}{2\pi} \left(\sum_{h = -2}^{-1} \gamma_X(h)e^{-ih\lambda} + \sum_{h = 0}^{2} \gamma_X(h)e^{-ih\lambda}   \right)\\
+&= \frac{1}{2\pi} \left(\gamma_X(0) + 2\sum_{h = 1}^{2} \gamma_X(h)e^{-ih\lambda}   \right)\\
+&= \frac{1}{2\pi} \left(\sigma^2 \sum_{i=0}^2\beta_i^2 + 2\sum_{h = 1}^{2} \gamma_X(h)e^{-ih\lambda}   \right)\\
+&= \frac{1}{2\pi} \left(\frac{\sigma^2}{2} + 2\gamma_X(1)e^{-i\lambda} + 2\gamma_X(2)e^{-i2\lambda}   \right)\\
+&= \frac{1}{2\pi} \left(\frac{\sigma^2}{2} + 2\sigma^2 (\beta_0 \beta_{1} + \beta_{1}\beta_{2}) e^{-i\lambda} + 2\sigma^2(\beta_0 \beta_2)e^{-i2\lambda}   \right)\\
+&= \frac{1}{2\pi}  \left(\frac{\sigma^2}{2} + 2\sigma^2 (0) e^{-i\lambda} + - \frac{\sigma^2}{2}e^{-i2\lambda}   \right)\\
+&= \frac{1}{2\pi}  \left(\frac{\sigma^2}{2} + - \frac{\sigma^2}{2}e^{-i2\lambda}   \right)
+\end{align*}
+
+
+#### c)
+$\{ X_t \}$ is a linear transformation of $\{ Z_t \}$ because 
+$X_t = \frac{1}{2} Z^{'}_{t} + Z^{'}_{t-1} - \frac{1}{2}Z^{'}_{t-2}$ which is a 
+linear combination of $\{ Z^{'}_t \}$ by letting $Z^{'}_t = Z_{t + 1}.$ 
+The corresponding filter coefficients $\psi_0 = 1/2$, $\psi_1 = 1$, $\psi_2 = -1/2$, 
+and $\psi_k = 0$ for $k \notin \{ 0,1,2\}$. The transfer function 
+\[ \psi(\lambda) = \sum_{j} \psi_j e^{-ij\lambda} = \frac{1}{2} + e^{-i\lambda} - \frac{1}{2} e^{-2\lambda i}. \]
+
+
+
+
+
+### Question 4
+### a) 
+Let $n = 100$, $p = 2$, and $q = 1$ with $\alpha_1 = \alpha_2 = 0.1$, $\beta_1 = 1$
+then the plot of the time series is 
+```{r, include=TRUE, echo=TRUE}
+arma1=arima.sim(100,model=list(ar=c(0.1,0.1),ma=1))
+plot(arma1,ylab="",main="ARMA(2,1), a1=a2=0.1,b1=1")
+```
+We then find the estimates of the model's parameters.
+
+```{r, echo=TRUE, include=TRUE}
+arma1.mle = arima(arma1,order=c(2,0,1),method="ML",include.mean=F);
+arma1.mle
+```
+The estimated parameters are $\hat{\alpha_1} = 0.16$, $\hat{\alpha_2} = 0.088$, and 
+$\hat{\beta_1} = 0.947$ which are pretty different from the true ones. The residuals
+plot is 
+```{r, echo=TRUE, include=TRUE}
+plot(arma1.mle$residuals)
+```
+There is no visible pattern to the residual plot which suggests that the estimated
+coefficients are appropriate. We use the Portmanteau test to evaluate the quality 
+of the fit 
+```{r, echo=TRUE, include=TRUE}
+Box.test(resid(arma.mle),type="Box-Pierce")$p.value
+
+```
+The returned $p$-value is $0.792$ which suggests an ok fit. 
+
+#### b)
+We fit an AR(2) model.
+```{r, echo=TRUE, include=TRUE}
+ar(x=arma1, order.max = 2, method=c("yw"))
+```
+The Yule-Walker estimates of the parameters are $\hat{\alpha_1} = 0.86$ and $\hat{\alpha_2} = -0.38$
+which are very different from that of $(a)$. The Portmanteau test returns 
+a $p$-value of $0.42$ which suggests that this is a good fit but since the estimated
+parameters from this method are more dissimilar with the true values compared to the ML-estimated ones
+so the quality of these estimates are not as good as that of a). 
+```{r, echo=TRUE, include=TRUE}
+Box.test(ar(x=arma1, order.max = 2)$resid,type="Box-Pierce")$p.value
+```
+
+
+
+
