@@ -12,6 +12,7 @@ library(knitr)
 library(afex)
 library(performance)
 library(magrittr)
+library(datasets)
 library(MASS)
 library(ggplot2)
 library(quantmod)
@@ -163,7 +164,7 @@ There is no visible pattern to the residual plot which suggests that the estimat
 coefficients are appropriate. We use the Portmanteau test to evaluate the quality 
 of the fit 
 ```{r, echo=TRUE, include=TRUE}
-Box.test(resid(arma.mle),type="Box-Pierce")$p.value
+Box.test(resid(arma1.mle),type="Box-Pierce")$p.value
 
 ```
 The returned $p$-value is $0.792$ which suggests an ok fit. 
@@ -181,6 +182,93 @@ so the quality of these estimates are not as good as that of a).
 ```{r, echo=TRUE, include=TRUE}
 Box.test(ar(x=arma1, order.max = 2)$resid,type="Box-Pierce")$p.value
 ```
+
+### Question 5
+#### a)
+The plot of $mdeaths$ and $fdeaths$ is
+```{r, echo=TRUE, include=TRUE}
+plot.ts(mdeaths, type='l', col="red", ylim=c(300, 3000), ylab="deaths")
+lines(fdeaths, type="l", col="blue")
+legend("topright", legend=c("mdeaths", "fdeaths"), 
+       col=c("red", "blue"), 
+       lty=1)
+```
+We can also decompose the time series into its components. The decomposition for 
+$mdeaths$ is:
+```{r, echo=TRUE, include=TRUE}
+decompm=decompose(mdeaths);
+plot(decompm)
+```
+And the decomposition of $fdeaths$ is
+```{r, echo=TRUE, include=TRUE}
+decompf=decompose(fdeaths);
+plot(decompf)
+```
+It can be seen that there exists seasonality in the two datasets since the number 
+of deaths of both genders spike every year at the beginning of the year. One obvious 
+difference between the two datasets is that the $mdeaths$ is far higher than $fdeaths$ 
+(male oppression). Furthermore, for both datasets, there seems to be a faint downward 
+trend of the number of deaths but this trend is stronger in $mdeaths$ than $fdeaths$. 
+
+
+#### b) 
+For this part, we only consider $mdeaths$, the plot of the time series $mdeaths$
+with its smoothing spline is 
+
+```{r, echo=TRUE, include=TRUE}
+plot.ts(mdeaths, type='l', col="red", ylim=c(300, 3000), 
+        ylab="deaths", main="spar=0.4")
+sm = smooth.spline(x=mdeaths, spar=0.4)
+lines(sm, col="blue", lwd=2)
+```
+We then subtract the spline from the original time series to obtain a time series
+with no trend or seasonality. 
+```{r, echo=TRUE, include=TRUE}
+md_rs = mdeaths - sm$y;
+plot.ts(md_rs)
+```
+We then plot an estimate of the autocorrelation function on the de-trended
+and de-seasonalized time series. 
+```{r, echo=TRUE, include=TRUE}
+acf(md_rs)
+```
+Since the ACF is mostly small, this confirms the fact that we are dealing with a 
+de-trended and de-seasonalized time series. For $p \in \{0,\dots,5 \}$
+and $q \in \{0,\dots,5 \}$, we fit different ARMA(p, q) models to the de-trended
+and de-seasonalized time series and obtain the best one. Different combinations 
+of $p$ and $q$ and their corresponding ARMA(p, q) model's AIC are listed below. 
+
+```{r, echo=TRUE, include=TRUE}
+for (p in c(1:5)) {
+  for (q in c(1:5)) {
+    
+    print(c(p, q, arima(md_rs,order=c(p,0,q),method="ML",include.mean=F)$aic))
+  }
+}
+```
+It can be seen that the $(p,q)$ value with the minimum AIC score is $(4,5)$ with
+an AIC score of 842. 
+
+#### d)
+```{r, echo=TRUE, include=TRUE}
+mdeaths_c = mdeaths[1:60];
+year = index(mdeaths)[1:60];
+yearsq=year^2;
+```
+Using the (fractional) year as time, we estimate the trend by a quadratic function 
+of time. 
+
+```{r, echo=TRUE, include=TRUE}
+trend_md = lm(mdeaths_c~year+yearsq);
+trend_md$coef
+```
+
+
+
+
+
+
+
 
 
 
