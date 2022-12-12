@@ -328,6 +328,10 @@ Very easily, we can check that the trivial strategy of buying, holding and selli
 
 It is important to remark that here we are not taking into account the fees and comissions that apply to every time we buy or sell an asset. This would make the final gain be even lower and, probably, negative.
 
+```{r, echo=TRUE, include=TRUE}
+gain1=price[n]-price[1]; gain1 # gain without using any trading strategy
+```
+
 
 
 
