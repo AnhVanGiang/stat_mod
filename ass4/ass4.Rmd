@@ -258,7 +258,75 @@ trend_md = lm(mdeaths_c~year+yearsq);
 trend_md$coef
 ```
 
+### Question 6
+#### a)
 
+The first step to get use the MACD method is to obtain the data. It is important to note that we are requested MACD and Signal lines to be defined for two specific dates. Hence, we need the data starting from earlier than the desired date. By trial and error we checked that we need our data to start on "2021-11-19".
+
+```{r, echo=TRUE, include=TRUE}
+library('TTR')
+library(quantmod)
+getSymbols("AAPL",from="2021-11-19",to="2022-11-19")
+stock=AAPL
+```
+Moving on, we now choose our parameters for MACD: $S=12$, $L=26$ and $K=9$. We can also check the numnber of NA values in the column Signal, for this column is the one that will have more NA's. A manual check has sufficed to check that indeed the first day for which both columns are defined is the desired date.
+
+```{r, echo=TRUE, include=TRUE}
+macd<-MACD(Cl(stock),nFast=12,nSlow=26,nSig=9,percent=FALSE)
+n.na=sum(is.na(macd$signal))
+n.na # OK
+```
+#### b)
+
+Before visualizing the data, we first will create a new table, for which we will have no NA values and, more importantly, we only have the data we care about. Afterwards, we will visualize a plot of the stock's price:
+
+```{r, echo=TRUE, include=TRUE}
+# trim
+t1=time(macd[n.na+1,]); t1 #=time(macd[nSlow+nSig-1,]) # row 34=26+9-1 
+macd2=macd[time(macd)>=t1] # macd2 starting from the date t1
+
+plot(Cl(stock))  # plot of the closing prices of the stock
+```
+Also, we can visualize in a same plot our valiues for MACD (red) and Signal (blue), paying special attention to the points where the two lines cross each other. 
+
+```{r, echo=TRUE, include=TRUE}
+plot(macd2$macd, col ="red") # plot of MACD line
+lines(macd2$signal,col="blue") # plot of Signal line
+```
+
+#### c)
+
+We now have to simulate how much benefit or loss we would have obtained by trading the stock on the crossings between the MACD line and Signal line. We start with an initial capital of $172.17$, but note that we do not buy the stock inmediately. In fact, we wait untill the Signal line crosses the MACD line from above to below. After that, we keep on following the strategy and, in the end, we sell the stock in the last day.
+
+By trading on the line crossings, we managed to obtain a benefit of $30.36$ and we still have the stock, which is worth $151.29$. This adds up to a total final capital of $181.65$. Of course, we still need to our initial capital, and we will see we have a final gain of $9.48$.
+
+```{r, echo=TRUE, include=TRUE}
+price<-as.numeric(Cl(stock[time(stock)>=t1]))
+n=length(price)
+gain1=price[n]-price[1]; gain1 # gain without using any trading strategy
+buy<-as.numeric(ifelse(macd2$macd < macd2$signal,1,-1))
+
+gain = price[1] # however, note we still don't buy it
+for (i in 1:219) {
+  j = i+1
+  if (buy[i] == 1 && buy[j] == -1) {
+    gain = gain - price[j] #buy stock
+  } else if (buy[i] == -1 && buy[j] == 1) {
+    gain = gain + price[j] #sell stock
+  }
+}
+gain; price[n]
+
+final_capital = gain + price[n]
+final_gain = final_capital - price[1]
+
+final_capital; final_gain
+```
+#### d)
+
+Very easily, we can check that the trivial strategy of buying, holding and selling does not seem to be beneficial for this stock at this particular time. In fact, one would have lost $-20.88$, which is worse than not investing at all. 
+
+It is important to remark that here we are not taking into account the fees and comissions that apply to every time we buy or sell an asset. This would make the final gain be even lower and, probably, negative.
 
 
 
