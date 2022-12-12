@@ -326,11 +326,11 @@ final_capital; final_gain
 
 Very easily, we can check that the trivial strategy of buying, holding and selling does not seem to be beneficial for this stock at this particular time. In fact, one would have lost $-20.88$, which is worse than not investing at all. 
 
-It is important to remark that here we are not taking into account the fees and comissions that apply to every time we buy or sell an asset. This would make the final gain be even lower and, probably, negative.
-
 ```{r, echo=TRUE, include=TRUE}
 gain1=price[n]-price[1]; gain1 # gain without using any trading strategy
 ```
+It is important to remark that here we are not taking into account the fees and comissions that apply to every time we buy or sell an asset. This would make the final gain be even lower and, probably, negative.
+
 
 
 
