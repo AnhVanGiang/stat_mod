@@ -79,15 +79,23 @@ Let $a = 1/2$, we have
 so $\{ aY_t \}$ follows an ARMA(p, q) model for $a = 1/2$, $\alpha_1 = 1/5$, $\beta_{1} = \beta_{2} = a$, $p = 1$, and $q = 2$. 
 
 #### b) 
+Assuming that $\{X_t\}$ is stationary, 
+\[ \text{Cov}(X_t, Z_t) = \text{Cov}(0.2 X_{t-1} + Z_t - Z_{t-1}, Z_t) = 0.2\text{Cov}(X_{t-1}, Z_t) + 1 = 1.\]
+We have 
+$\ex(X_t) = \ex(0.2X_{t-1} + Z_t + Z_{t-1}) = 0.2\ex(X_{t-1}) = 0.2 \ex(X_t)$,
+thus it follows that $\ex(X_t) = 0$. 
+Also, 
+\[ \text{Var}(X_t) = \text{Var}(0.2 X_{t-1} + Z_t - Z_{t-1}) = 0.04 \text{Var}(X_{t-1}) + 2 = 0.04 \text{Var}(X_{t}) + 2 \]then 
+$\text{Var}(X_t) = \frac{2}{0.96}.$
 We have 
 \begin{align*}
-\text{Cov}(X_t, Z_t) &= \ex[(X_t - \ex(X_t))(Z_t - \ex(Z_t))]\\
-&=\ex[(X_t - \ex(X_t))Z_t]\\
-&= \ex(X_t Z_t) - \ex[Z_t \ex(X_t)]. 
+\gamma_X(1) &= \text{Cov}(X_t, X_{t+ 1})\\
+&= \text{Cov}(X_t, 0.2 X_t + Z_{t+1} - Z_{t})\\
+&= \text{Cov}(X_t, 0.2 X_t) + \text{Cov}(X_t, Z_{t-1}) - \text{Cov}(X_t, Z_t))\\
+&= 0.2 \text{Var}(X_t) - 1\\
+&= 0.2 \frac{2}{0.96} - 1 = -0.583. 
 \end{align*}
-Assuming that $\{X_t\}$ is stationary, 
-\[ \text{Cov}(X_t, Z_t) = \ex(X_t Z_t) - \ex[Z_t \ex(X_t)] = \ex(X_t Z_t) - \ex(Z_t)\ex(X_t)\]
-so 
+
 
 
 
@@ -137,16 +145,21 @@ f_X(\lambda) &= \frac{1}{2\pi} \sum_{h \in \mathbb{Z}} \gamma_X(h) e^{-ih\lambda
 $\{ X_t \}$ is a linear transformation of $\{ Z_t \}$ because 
 $X_t = \frac{1}{2} Z^{'}_{t} + Z^{'}_{t-1} - \frac{1}{2}Z^{'}_{t-2}$ which is a 
 linear combination of $\{ Z^{'}_t \}$ by letting $Z^{'}_t = Z_{t + 1}.$ 
-The corresponding filter coefficients $\psi_0 = 1/2$, $\psi_1 = 1$, $\psi_2 = -1/2$, 
+The corresponding filter coefficients $\psi_{-1} = 1/2$, $\psi_0 = 1$, $\psi_1 = -1/2$, 
 and $\psi_k = 0$ for $k \notin \{ 0,1,2\}$. The transfer function 
-\[ \psi(\lambda) = \sum_{j} \psi_j e^{-ij\lambda} = \frac{1}{2} + e^{-i\lambda} - \frac{1}{2} e^{-2\lambda i}. \]
+\[ \psi(\lambda) = \sum_{j} \psi_j e^{-ij\lambda} = \frac{1}{2} e^{i \lambda} + 1 - \frac{1}{2} e^{-\lambda i}. \]
+We then have that 
 
-
-
+\begin{align*}
+|\psi(\lambda)|^2 &= \left|1 + \frac{1}{2}\cos{\lambda} + \mi \frac{1}{2} \sin{\lambda} 
+- \frac{1}{2}\cos{\lambda} + \mi \frac{1}{2} \sin{\lambda} \right|^2\\
+&= \frac{3}{2} - \frac{\cos{2 \lambda}}{2}\\
+\end{align*}
+Thus, it follows that $f_X(\lambda) = |\psi(\lambda)|^2 f_Z(\lambda)$. 
 
 
 ### Question 4
-### a) 
+#### a) 
 Let $n = 100$, $p = 2$, and $q = 1$ with $\alpha_1 = \alpha_2 = 0.1$, $\beta_1 = 1$
 then the plot of the time series is 
 ```{r, include=TRUE, echo=TRUE}
@@ -175,19 +188,28 @@ Box.test(resid(arma1.mle),type="Box-Pierce")$p.value
 The returned $p$-value is $0.792$ which suggests an ok fit. 
 
 #### b)
-We fit an AR(2) model.
+We first generate an AR(p) times series of length $100$ for $p = 1$ with $\alpha_1 = 0.1$. 
 ```{r, echo=TRUE, include=TRUE}
-ar(x=arma1, order.max = 2, method=c("yw"))
+ar1=arima.sim(100,model=list(ar=0.1))
+plot(ar1,ylab="",main="AR(1), a1=0.1")
 ```
-The Yule-Walker estimates of the parameters are $\hat{\alpha_1} = 0.86$ and $\hat{\alpha_2} = -0.38$
-which are very different from that of $(a)$. The Portmanteau test returns 
-a $p$-value of $0.42$ which suggests that this is a good fit but since the estimated
-parameters from this method are more dissimilar with the true values compared to the ML-estimated ones
-so the quality of these estimates are not as good as that of a). 
+The estimated parameter of the model using Yule-Walker is $\hat{\alpha}_1 = 0.245$.
+The $p$-value resulting from the Portmanteau test is 0.7 which is larger than 0.05
+signifying that this is a good fit. 
 ```{r, echo=TRUE, include=TRUE}
-Box.test(ar(x=arma1, order.max = 2)$resid,type="Box-Pierce")$p.value
+
+ar.yw(ar1, order.max=1)
+
 ```
 
+```{r, echo=TRUE, include=TRUE}
+
+Box.test(resid(arima(ar1,order=c(1, 0, 0),method="ML",include.mean=F),type="Box-Pierce"))$p.value
+
+```
+The estimated parameter from Yule-Walker for this model is not as good as the ones 
+from a) because $0.16$ and $0.088$ are much closer to $0.1$ than $0.245$. 
+$0.245$ is much closer to $0.1$ than 
 ### Question 5
 #### a)
 The plot of $mdeaths$ and $fdeaths$ is
@@ -256,18 +278,58 @@ an AIC score of 842.
 
 #### d)
 ```{r, echo=TRUE, include=TRUE}
-mdeaths_c = mdeaths[1:60];
-year = index(mdeaths)[1:60];
+mdeaths_c = ts(first(mdeaths, "60 months"), start=c(1974, 1), end=c(1979, 12), frequency=12);
+year = index(mdeaths_c);
 yearsq=year^2;
 ```
 Using the (fractional) year as time, we estimate the trend by a quadratic function 
-of time. 
+of time. The coefficients of the quadratic function are $(-2.33e7, 2.36e4, -6)$. 
+The plot of $mdeaths$ up to the last 12 months with its trend as quadratic function shown
+in blue is below. 
 
 ```{r, echo=TRUE, include=TRUE}
 trend_md = lm(mdeaths_c~year+yearsq);
 trend_md$coef
 ```
 
+```{r, echo=TRUE, include=TRUE}
+plot(mdeaths_c, xlab="Year", main="Number of male deaths")
+lines(year,trend_md$coef[1]+trend_md$coef[2]*year+trend_md$coef[3]*yearsq,col="blue")
+```
+The seasonal components can be plotted as 
+```{r, echo=TRUE, include=TRUE}
+plot.ts(decompose(mdeaths_c)$seasonal);
+```
+Subtracting the trend and seasonality from the data to obtain the random component. 
+
+
+```{r, echo=TRUE, include=TRUE}
+mdeaths_c.dtr = mdeaths_c - (trend_md$coef[1]+trend_md$coef[2]*year+trend_md$coef[3]*yearsq);
+mdeaths_c.ran = diff(mdeaths_c.dtr, lag=12);
+```
+We then fit the ARMA(4,5) model from b) to the random component to predict the 
+next 12 months. 
+```{r, echo=TRUE, include=TRUE}
+mdeaths_c.mle = arima(mdeaths_c.ran,order=c(4,0,5),method="ML",include.mean=F);
+pred=predict(mdeaths_c.mle,n.ahead=12);
+plot(pred$pred, xlab="Year");
+```
+We compare the predictions against the actual (de-trended and de-seasonalized) data.
+data of the next 12 months.
+```{r, echo=TRUE, include=TRUE}
+ya = index(mdeaths);
+yaq = ya^2;
+mdeaths.dtr = mdeaths - (trend_md$coef[1]+trend_md$coef[2]*ya+trend_md$coef[3]*yaq);
+mdeaths.ran = diff(mdeaths.dtr, lag=12);
+plot(x=index(pred$pred), y=last(mdeaths.ran, "12 months"), col="red", type="l",
+     xlab="Year")
+lines(pred$pred, col="blue")
+legend("topright", legend=c("Actual", "Predicted"), 
+       col=c("red", "blue"), 
+       lty=1)
+```
+It can be seen that there are times where the differences between the actual and predicted 
+data differ quite a bit. 
 ### Question 6
 #### a)
 
