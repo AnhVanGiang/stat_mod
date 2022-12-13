@@ -119,7 +119,17 @@ and the spectral density
 f_X(\lambda) &= \frac{1}{2\pi} \sum_{h \in \mathbb{Z}} \gamma_X(h) e^{-ih\lambda}\\
 &=\frac{1}{2\pi} \sum_{h = -2}^{2} \gamma_X(h) e^{-ih\lambda}\\
 &= \frac{1}{2\pi} \left(\sum_{h = -2}^{-1} \gamma_X(h)e^{-ih\lambda} + \sum_{h = 0}^{2} \gamma_X(h)e^{-ih\lambda}   \right)\\
-&= \frac{1}{2\pi} \left(\gamma_X(2)e^{i2\lambda} + \gamma_X(1)e^{i\lambda}  + \sum_{h = 0}^{2} \gamma_X(h)e^{-ih\lambda}   \right)\\
+&= \frac{1}{2\pi} \left(\gamma_X(2)e^{i2\lambda} + \gamma_X(1)e^{i\lambda}+\gamma_X(0) 
++ \gamma_X(1)e^{-i\lambda} + \gamma_X(2)e^{-i2\lambda} \right)\\
+&= \frac{1}{2\pi} \left(\gamma_X(2)e^{i2\lambda} + \gamma_X(1)e^{i\lambda}+\gamma_X(0) 
++ \gamma_X(1)e^{-i\lambda} + \gamma_X(2)e^{-i2\lambda} \right)\\
+&= \frac{1}{2\pi} \left(\gamma_X(2)(e^{i2\lambda} + e^{-i2\lambda} +\gamma_X(0))  + 
+\gamma_X(1)(e^{i\lambda} + e^{-i\lambda}) \right)\\
+&=\frac{1}{2\pi} \left(\gamma_X(2)(e^{i2\lambda} + e^{-i2\lambda}) +\gamma_X(0) + 
+\gamma_X(1)(e^{i\lambda} + e^{-i\lambda}) \right)\\
+&= \frac{1}{2\pi} \left(\gamma_X(2) \left(e^{i2\lambda} + e^{-i2\lambda} \right)
++ \frac{3}{2} \sigma^2 \right)\\
+&= \frac{1}{2\pi} \sigma^2 \left(\frac{-1}{2} \cos{2\lambda}  +\frac{3}{2} \right)
 \end{align*}
 
 
