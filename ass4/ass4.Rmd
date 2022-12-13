@@ -317,7 +317,7 @@ gain1=price[n]-price[1]; gain1 # gain without using any trading strategy
 buy<-as.numeric(ifelse(macd2$macd < macd2$signal,1,-1))
 
 gain = price[1] # however, note we still don't buy it
-for (i in 1:219) {
+for (i in 1:218) {
   j = i+1
   if (buy[i] == 1 && buy[j] == -1) {
     gain = gain - price[j] #buy stock
